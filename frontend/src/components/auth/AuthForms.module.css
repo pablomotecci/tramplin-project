@@ -1,0 +1,107 @@
+/* Общие стили форм авторизации */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* Выбор роли */
+.roleSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.roleLabel {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.roleToggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.roleBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-3);
+  background-color: var(--color-bg);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.roleBtn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background-color: var(--color-accent-light);
+}
+
+.roleBtnActive {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent-light);
+  color: var(--color-accent);
+}
+
+.roleIcon {
+  font-size: var(--text-xl);
+}
+
+/* Блок ошибки */
+.errorBlock {
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-error-bg);
+  border-radius: var(--radius-md);
+  color: var(--color-error);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-align: center;
+  animation: shake 0.4s var(--ease-out);
+}
+
+/* Переключатель мужду Вход/Регистрация */
+.switchText {
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.switchLink {
+  color: var(--color-accent);
+  font-weight: 600;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  padding: 0;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.switchLink:hover {
+  color: var(--color-accent-hover);
+  text-decoration: underline;
+}
+
+/* Анимация тряски при ошибке */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-6px); }
+  40%      { transform: translateX(6px); }
+  60%      { transform: translateX(-4px); }
+  80%      { transform: translateX(4px); }
+}

@@ -1,0 +1,688 @@
+/* Общие стили для трех ЛК-ов т.к каркас везде одинаковый*/
+
+.dashboard {
+    min-height: calc(100vh - 72px);
+    background: var(--color-bg);
+    padding: 2rem 1rem;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* Шапка страницы */
+.pageHeader {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.pageTitle {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.roleBadge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: var(--color-accent-light, #fef0e8);
+    color: var(--color-accent);
+}
+
+.roleBadgeEmployer {
+    background: rgba(26, 86, 219, 0.15);
+    color: #60a5fa;
+}
+
+.roleBadgeCurator {
+    background: rgba(52, 211, 153, 0.15);
+    color: #34d399;
+}
+
+/* Карточки */
+.card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.cardHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.cardTitle {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Сетка grid карточек */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pageTitle {
+        font-size: 1.5rem;
+    }
+
+    .formRow {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* Профиль */
+.profileSummary {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.profileView {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.avatarCompany {
+    background: #1a56db;
+    border-radius: 12px;
+}
+
+.profileInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.profileName {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.profileEmail {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+/* Детали профиля в режиме просмотра */
+.detailsGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.detailItem {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.detailFull {
+    grid-column: 1 / -1;
+}
+
+.detailLabel {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.detailValue {
+    font-size: 0.95rem;
+    color: var(--color-text-primary);
+    line-height: 1.5;
+}
+
+/* Форма редактирования */
+.editForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.formRow {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.formActions {
+    display: flex;
+    gap: 0.75rem;
+    padding-top: 0.5rem;
+}
+
+.textareaGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.textareaLabel {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    color: var(--color-text-primary);
+    background: var(--color-bg);
+    resize: vertical;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+}
+
+.textarea:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+.textarea::placeholder {
+    color: var(--color-text-secondary);
+    opacity: 0.6;
+}
+
+
+.placeholder {
+    color: var(--color-text-secondary);
+    font-size: 0.95rem;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.warningBanner {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.25);
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    color: #fbbf24;
+}
+
+.warningBanner span {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.warningBanner strong {
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.warningBanner p {
+    margin: 0;
+    line-height: 1.4;
+}
+
+.successBanner {
+    padding: 0.75rem 1.25rem;
+    background: rgba(52, 211, 153, 0.1);
+    border: 1px solid rgba(52, 211, 153, 0.25);
+    border-radius: 12px;
+    color: #34d399;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+}
+
+.errorBanner {
+    padding: 0.75rem 1.25rem;
+    background: rgba(248, 113, 113, 0.1);
+    border: 1px solid rgba(248, 113, 113, 0.25);
+    border-radius: 12px;
+    color: #f87171;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Состояние загрузки */
+.loadingState {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 40vh;
+    color: var(--color-text-secondary);
+    font-size: 1.1rem;
+}
+
+
+.cardActions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.verificationBadge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.6rem;
+    border: 1.5px solid;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.formRow2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.detailLink {
+    font-size: 0.95rem;
+    color: var(--color-accent);
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.detailLink:hover {
+    opacity: 0.7;
+}
+
+@media (max-width: 768px) {
+    .formRow2 {
+        grid-template-columns: 1fr;
+    }
+
+    .cardActions {
+        flex-wrap: wrap;
+    }
+}
+
+
+/* Список вакансий работодателя */
+
+.cardFull {
+    margin-top: 1.5rem;
+}
+
+.opportunitiesList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.oppCard {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.oppCard:hover {
+    border-color: var(--color-accent);
+    box-shadow: 0 2px 12px rgba(232, 98, 44, 0.08);
+}
+
+.oppMain {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.oppTop {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.oppStatus {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.oppType {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    padding: 0.1rem 0.5rem;
+    background: var(--color-bg-subtle);
+    border-radius: 999px;
+}
+
+.oppTitle {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 0;
+    cursor: pointer;
+    transition: color 0.15s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.oppTitle:hover {
+    color: var(--color-accent);
+}
+
+.oppMeta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+}
+
+.oppActions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    margin-left: 1rem;
+}
+
+.oppBtnEdit,
+.oppBtnDelete {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.oppBtnEdit:hover {
+    border-color: var(--color-accent);
+    background: var(--color-accent-light);
+}
+
+.oppBtnDelete:hover {
+    border-color: var(--color-error);
+    background: var(--color-error-bg);
+}
+
+.oppBtnDelete:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 2rem 0;
+    color: var(--color-text-secondary);
+}
+
+
+/* Адаптация под мобильные устройства */
+@media (max-width: 768px) {
+    .oppCard {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .oppActions {
+        margin-left: 0;
+        align-self: flex-end;
+    }
+
+    .oppMeta {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+}
+
+
+
+/* Избранное */
+.favList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.favItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: var(--color-bg-subtle);
+    transition: background 0.15s ease;
+}
+
+.favItem:hover {
+    background: var(--color-bg-elevated);
+}
+
+.favInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    cursor: pointer;
+    flex: 1;
+}
+
+.favTitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary, #1a1a1a);
+}
+
+.favInfo:hover .favTitle {
+    color: var(--accent, #E8622C);
+}
+
+.favCompany {
+    font-size: 12px;
+    color: var(--text-secondary, #6b7280);
+}
+
+.favRemove {
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: var(--text-secondary, #6b7280);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.favRemove:hover {
+    color: #dc2626;
+    background: #fef2f2;
+}
+
+
+
+/* Отклики */
+.appsTable {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.appRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    border-radius: 8px;
+    background: var(--color-bg-subtle);
+    gap: 12px;
+}
+
+.appRow:hover {
+    background: var(--color-bg-elevated);
+}
+
+.appInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.appTitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary, #1a1a1a);
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.appTitle:hover {
+    color: var(--accent, #E8622C);
+}
+
+.appCompany {
+    font-size: 12px;
+    color: var(--text-secondary, #6b7280);
+}
+
+.appMeta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.appStatus {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 12px;
+    border: 1px solid;
+    white-space: nowrap;
+}
+
+.appDate {
+    font-size: 12px;
+    color: var(--text-secondary, #6b7280);
+    white-space: nowrap;
+}
+
+
+/* Отклики работодателя */
+.appRowEmployer {
+    padding: 14px;
+    border-radius: 8px;
+    background: var(--bg-secondary, #f9fafb);
+    margin-bottom: 8px;
+}
+
+.appRowEmployer:hover {
+    background: var(--bg-tertiary, #f3f4f6);
+}
+
+.appOppLink {
+    font-size: 12px;
+    color: var(--accent, #E8622C);
+    cursor: pointer;
+}
+
+.appOppLink:hover {
+    text-decoration: underline;
+}
+
+.appCoverLetter {
+    font-size: 13px;
+    color: var(--text-secondary, #6b7280);
+    margin: 8px 0;
+    padding: 8px 12px;
+    background: var(--bg-primary, #fff);
+    border-radius: 6px;
+    border-left: 3px solid var(--accent, #E8622C);
+}
+
+.appActions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+    gap: 12px;
+}
+
+.statusSelect {
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border, #d1d5db);
+    font-size: 13px;
+    cursor: pointer;
+    background: var(--bg-primary, #fff);
+}
+
+.filterSelect {
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border, #d1d5db);
+    font-size: 13px;
+    background: var(--bg-primary, #fff);
+}
