@@ -86,11 +86,14 @@ public class OpportunityController {
             @RequestParam(required = false) String city,
             @RequestParam(required = false) Long salaryMin,
             @RequestParam(required = false) List<UUID> tagIds,
+            @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("publishedAt").descending());
-        Page<OpportunityResponse> response = opportunityService.getAll(type, workFormat, city, salaryMin, tagIds, pageable);
+        Page<OpportunityResponse> response = opportunityService.getAll(
+                type, workFormat, city, salaryMin, tagIds, search, pageable
+        );
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 

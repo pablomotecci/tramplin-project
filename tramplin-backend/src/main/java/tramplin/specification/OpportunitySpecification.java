@@ -5,6 +5,7 @@ import tramplin.entity.Opportunity;
 import tramplin.entity.enums.OpportunityType;
 import tramplin.entity.enums.WorkFormat;
 import tramplin.entity.enums.OpportunityStatus;
+import jakarta.persistence.criteria.JoinType;
 
 import java.util.List;
 import java.util.UUID;
@@ -47,5 +48,18 @@ public class OpportunitySpecification {
                     var tagsJoin = root.join("tags");
                     return tagsJoin.get("id").in(tagIds);
                 };
+    }
+
+    public static Specification<Opportunity> searchByText(String search) {
+        return (search == null || search.isBlank())
+                ? (root, query, cb) -> cb.conjunction()
+                : (root, query, cb) -> {
+            String pattern = "%" + search.trim().toLowerCase() + "%";
+            return cb.or(
+                    cb.like(cb.lower(root.get("title")), pattern),
+                    cb.like(cb.lower(root.get("description")), pattern),
+                    cb.like(cb.lower(root.get("employer").get("companyName")), pattern)
+            );
+        };
     }
 }

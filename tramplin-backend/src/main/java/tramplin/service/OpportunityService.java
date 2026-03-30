@@ -239,11 +239,8 @@ public class OpportunityService {
 
     @Transactional(readOnly = true)
     public Page<OpportunityResponse> getAll(
-            OpportunityType type,
-            WorkFormat workFormat,
-            String city,
-            Long salaryMin,
-            List<UUID> tagIds,
+            OpportunityType type, WorkFormat workFormat, String city,
+            Long salaryMin, List<UUID> tagIds, String search,
             Pageable pageable
     ) {
         Specification<Opportunity> spec = Specification
@@ -252,7 +249,8 @@ public class OpportunityService {
                 .and(OpportunitySpecification.hasWorkFormat(workFormat))
                 .and(OpportunitySpecification.hasCity(city))
                 .and(OpportunitySpecification.hasSalaryMin(salaryMin))
-                .and(OpportunitySpecification.hasTags(tagIds));
+                .and(OpportunitySpecification.hasTags(tagIds))
+                .and(OpportunitySpecification.searchByText(search));
 
         return opportunityRepository.findAll(spec, pageable)
                 .map(this::mapToResponse);

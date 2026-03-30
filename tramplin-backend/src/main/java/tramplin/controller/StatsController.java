@@ -27,12 +27,11 @@ public class StatsController {
     private final UserRepository userRepository;
 
     @GetMapping("/public")
-    @Operation(summary = "Статистика платформы", description = "Количество компаний, вакансий, стажировок, соискателей")
     public ResponseEntity<ApiResponse<PlatformStatsResponse>> getStats() {
-
         long companies = companyRepository.count();
-        long opportunities = opportunityRepository.findByStatus(OpportunityStatus.ACTIVE).size();
-        long internships = opportunityRepository.findByStatusAndType(OpportunityStatus.ACTIVE, OpportunityType.INTERNSHIP).size();
+        long opportunities = opportunityRepository.countByStatus(OpportunityStatus.ACTIVE);
+        long internships = opportunityRepository.countByStatusAndType(
+                OpportunityStatus.ACTIVE, OpportunityType.INTERNSHIP);
         long applicants = userRepository.countByRole(Role.APPLICANT);
 
         PlatformStatsResponse stats = PlatformStatsResponse.builder()

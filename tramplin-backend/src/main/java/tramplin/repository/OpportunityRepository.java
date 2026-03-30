@@ -38,7 +38,9 @@ public interface OpportunityRepository extends JpaRepository<Opportunity, UUID>,
 
     List<Opportunity> findByEmployerIdAndStatus(UUID employerId, OpportunityStatus status);
 
-    List<Opportunity> findByStatusAndType(OpportunityStatus status, OpportunityType type);
+    long countByStatus(OpportunityStatus status);
+
+    long countByStatusAndType(OpportunityStatus status, OpportunityType type);
 
     @Query("SELECT o FROM Opportunity o WHERE o.status = 'ACTIVE' " +
             "AND ST_Within(o.location, ST_MakeEnvelope(:swLng, :swLat, :neLng, :neLat, 4326)) = true")
