@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgis/postgis:16-3.4
@@ -19,7 +17,9 @@ services:
       retries: 5
 
   backend:
-    build: .
+    build:
+      context: ./tramplin-backend
+      dockerfile: Dockerfile
     container_name: tramplin-backend
     depends_on:
       postgres:
@@ -30,12 +30,22 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-tramplin_secret}
       JWT_SECRET: ${JWT_SECRET:-my-super-secret-key-for-jwt-256-bits-long!!}
       YANDEX_GEOCODER_API_KEY: ${YANDEX_GEOCODER_API_KEY:-}
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:3000,http://localhost}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:3000}
       SPRING_PROFILES_ACTIVE: prod
     ports:
       - "8080:8080"
     volumes:
       - uploads_data:/app/uploads
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
 
 volumes:
   postgres_data:

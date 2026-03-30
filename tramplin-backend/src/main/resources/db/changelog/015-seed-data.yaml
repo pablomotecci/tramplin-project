@@ -15,11 +15,11 @@ databaseChangeLog:
         - sql:
             sql: |
               INSERT INTO users (id, email, display_name, password_hash, role, status, created_at, updated_at) VALUES
-              (gen_random_uuid(), 'hr@yandex.ru',     'Яндекс HR',     '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'EMPLOYER', 'ACTIVE', now(), now()),
-              (gen_random_uuid(), 'hr@vk.com',        'VK HR',         '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'EMPLOYER', 'ACTIVE', now(), now()),
-              (gen_random_uuid(), 'hr@sber.ru',       'Сбер HR',       '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'EMPLOYER', 'ACTIVE', now(), now()),
-              (gen_random_uuid(), 'hr@tinkoff.ru',    'Тинькофф HR',   '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'EMPLOYER', 'ACTIVE', now(), now()),
-              (gen_random_uuid(), 'hr@kaspersky.ru',  'Касперский HR', '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'EMPLOYER', 'ACTIVE', now(), now());
+              (gen_random_uuid(), 'hr@yandex.ru',     'Яндекс HR',     '$2b$10$BBm2P1cNT83s7SbzHPr03uXKO0Xi1Pkn9q4/LQcxWMbN8kNZtvyG.', 'EMPLOYER', 'ACTIVE', now(), now()),
+              (gen_random_uuid(), 'hr@vk.com',        'VK HR',         '$2b$10$BBm2P1cNT83s7SbzHPr03uXKO0Xi1Pkn9q4/LQcxWMbN8kNZtvyG.', 'EMPLOYER', 'ACTIVE', now(), now()),
+              (gen_random_uuid(), 'hr@sber.ru',       'Сбер HR',       '$2b$10$BBm2P1cNT83s7SbzHPr03uXKO0Xi1Pkn9q4/LQcxWMbN8kNZtvyG.', 'EMPLOYER', 'ACTIVE', now(), now()),
+              (gen_random_uuid(), 'hr@tinkoff.ru',    'Тинькофф HR',   '$2b$10$BBm2P1cNT83s7SbzHPr03uXKO0Xi1Pkn9q4/LQcxWMbN8kNZtvyG.', 'EMPLOYER', 'ACTIVE', now(), now()),
+              (gen_random_uuid(), 'hr@kaspersky.ru',  'Касперский HR', '$2b$10$BBm2P1cNT83s7SbzHPr03uXKO0Xi1Pkn9q4/LQcxWMbN8kNZtvyG.', 'EMPLOYER', 'ACTIVE', now(), now());
 
   # --- 5 КОМПАНИЙ (companies) ---
   - changeSet:
@@ -45,16 +45,16 @@ databaseChangeLog:
         - sql:
             sql: |
               INSERT INTO users (id, email, display_name, password_hash, role, status, created_at, updated_at) VALUES
-              (gen_random_uuid(), 'ivan.petrov@mail.ru',       'Иван Петров',      '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'APPLICANT', 'ACTIVE', now(), now()),
-              (gen_random_uuid(), 'maria.sidorova@mail.ru',    'Мария Сидорова',    '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'APPLICANT', 'ACTIVE', now(), now()),
-              (gen_random_uuid(), 'alex.kozlov@gmail.com',     'Алексей Козлов',    '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'APPLICANT', 'ACTIVE', now(), now()),
-              (gen_random_uuid(), 'elena.volkova@mail.ru',     'Елена Волкова',     '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'APPLICANT', 'ACTIVE', now(), now()),
-              (gen_random_uuid(), 'dmitry.novikov@gmail.com',  'Дмитрий Новиков',   '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'APPLICANT', 'ACTIVE', now(), now()),
-              (gen_random_uuid(), 'anna.morozova@mail.ru',     'Анна Морозова',     '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'APPLICANT', 'ACTIVE', now(), now()),
-              (gen_random_uuid(), 'sergey.ivanov@gmail.com',   'Сергей Иванов',     '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'APPLICANT', 'ACTIVE', now(), now()),
-              (gen_random_uuid(), 'olga.kuznetsova@mail.ru',   'Ольга Кузнецова',   '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'APPLICANT', 'ACTIVE', now(), now()),
-              (gen_random_uuid(), 'nikita.sokolov@gmail.com',  'Никита Соколов',    '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'APPLICANT', 'ACTIVE', now(), now()),
-              (gen_random_uuid(), 'daria.popova@mail.ru',      'Дарья Попова',      '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'APPLICANT', 'ACTIVE', now(), now());
+              (gen_random_uuid(), 'ivan.petrov@mail.ru',       'Иван Петров',      '$2b$10$BBm2P1cNT83s7SbzHPr03uXKO0Xi1Pkn9q4/LQcxWMbN8kNZtvyG.', 'APPLICANT', 'ACTIVE', now(), now()),
+              (gen_random_uuid(), 'maria.sidorova@mail.ru',    'Мария Сидорова',    '$2b$10$BBm2P1cNT83s7SbzHPr03uXKO0Xi1Pkn9q4/LQcxWMbN8kNZtvyG.', 'APPLICANT', 'ACTIVE', now(), now()),
+              (gen_random_uuid(), 'alex.kozlov@gmail.com',     'Алексей Козлов',    '$2b$10$BBm2P1cNT83s7SbzHPr03uXKO0Xi1Pkn9q4/LQcxWMbN8kNZtvyG.', 'APPLICANT', 'ACTIVE', now(), now()),
+              (gen_random_uuid(), 'elena.volkova@mail.ru',     'Елена Волкова',     '$2b$10$BBm2P1cNT83s7SbzHPr03uXKO0Xi1Pkn9q4/LQcxWMbN8kNZtvyG.', 'APPLICANT', 'ACTIVE', now(), now()),
+              (gen_random_uuid(), 'dmitry.novikov@gmail.com',  'Дмитрий Новиков',   '$2b$10$BBm2P1cNT83s7SbzHPr03uXKO0Xi1Pkn9q4/LQcxWMbN8kNZtvyG.', 'APPLICANT', 'ACTIVE', now(), now()),
+              (gen_random_uuid(), 'anna.morozova@mail.ru',     'Анна Морозова',     '$2b$10$BBm2P1cNT83s7SbzHPr03uXKO0Xi1Pkn9q4/LQcxWMbN8kNZtvyG.', 'APPLICANT', 'ACTIVE', now(), now()),
+              (gen_random_uuid(), 'sergey.ivanov@gmail.com',   'Сергей Иванов',     '$2b$10$BBm2P1cNT83s7SbzHPr03uXKO0Xi1Pkn9q4/LQcxWMbN8kNZtvyG.', 'APPLICANT', 'ACTIVE', now(), now()),
+              (gen_random_uuid(), 'olga.kuznetsova@mail.ru',   'Ольга Кузнецова',   '$2b$10$BBm2P1cNT83s7SbzHPr03uXKO0Xi1Pkn9q4/LQcxWMbN8kNZtvyG.', 'APPLICANT', 'ACTIVE', now(), now()),
+              (gen_random_uuid(), 'nikita.sokolov@gmail.com',  'Никита Соколов',    '$2b$10$BBm2P1cNT83s7SbzHPr03uXKO0Xi1Pkn9q4/LQcxWMbN8kNZtvyG.', 'APPLICANT', 'ACTIVE', now(), now()),
+              (gen_random_uuid(), 'daria.popova@mail.ru',      'Дарья Попова',      '$2b$10$BBm2P1cNT83s7SbzHPr03uXKO0Xi1Pkn9q4/LQcxWMbN8kNZtvyG.', 'APPLICANT', 'ACTIVE', now(), now());
 
   # --- 10 ПРОФИЛЕЙ СОИСКАТЕЛЕЙ (applicant_profiles) ---
   - changeSet:

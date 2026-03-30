@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import tramplin.entity.Opportunity;
 import tramplin.entity.enums.OpportunityStatus;
+import tramplin.entity.enums.OpportunityType;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,6 +37,8 @@ public interface OpportunityRepository extends JpaRepository<Opportunity, UUID>,
     List<Opportunity> findByEmployerId(UUID employerId);
 
     List<Opportunity> findByEmployerIdAndStatus(UUID employerId, OpportunityStatus status);
+
+    List<Opportunity> findByStatusAndType(OpportunityStatus status, OpportunityType type);
 
     @Query("SELECT o FROM Opportunity o WHERE o.status = 'ACTIVE' " +
             "AND ST_Within(o.location, ST_MakeEnvelope(:swLng, :swLat, :neLng, :neLat, 4326)) = true")
