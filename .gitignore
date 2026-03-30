@@ -1,34 +1,48 @@
 # ============================================================
-# .gitignore для tramplin-backend
+# .gitignore для монорепозитория (Backend + Frontend)
 # ============================================================
 
-# Сборка
+# === БЭКЕНД (tramplin-backend) ===
 tramplin-backend/target/
+tramplin-backend/.idea/
 build/
 *.class
 *.jar
 *.war
 
-# IDE
+# === ФРОНТЕНД (frontend) ===
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.npm/
+
+# === СЕКРЕТЫ И ПЕРЕМЕННЫЕ ===
+# Игнорируем везде, чтобы не утекли пароли
+.env
+.env.properties
+.env.local
+.env.development
+.env.test
+.env.production
+
+# === IDE И НАСТРОЙКИ ===
 .idea/
 *.iml
 .vscode/
 *.swp
+.settings/
+.project
+.classpath
 
-# Переменные окружения с секретами
-.env.properties
-.env
-
-# Логи
+# === ЛОГИ ===
 *.log
 logs/
 
-# Загрузки пользователей
+# === ЗАГРУЗКИ И ДАННЫЕ ===
 uploads/
-
-# Docker volumes
 postgres_data/
+pgdata/
 
-# OS
+# === OS ===
 .DS_Store
 Thumbs.db
