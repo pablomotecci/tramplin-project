@@ -48,6 +48,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/tags/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/employers/*/public").permitAll()
                 .requestMatchers(HttpMethod.GET, "/geocode").permitAll()
+                .requestMatchers(HttpMethod.GET, "/stats/**").permitAll()
                 .requestMatchers(
                     "/swagger-ui/**",
                     "/swagger-ui.html",
