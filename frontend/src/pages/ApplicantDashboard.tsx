@@ -21,6 +21,9 @@ import { SkeletonProfile } from '../components/ui/Skeleton';
 import { getRecommendationsForMe, type RecommendationResponse } from '../api/recommendations';
 import { getRecommendationsForApplicant, type OpportunityScore } from '../api/scoring';
 import { FileUpload } from '../components/ui/FileUpload';
+import { getTags } from '../api/tags';
+import { getApplicantTags, updateApplicantTags } from '../api/applicant';
+import type { Tag } from '../types';
 
 
 
@@ -60,7 +63,9 @@ export function ApplicantDashboard() {
   const [recommendations, setRecommendations] = useState<RecommendationResponse[]>([]);
   const [recsLoading, setRecsLoading] = useState(false);
 
-  // ��коринг — подобранные вакансии
+  const [allTags, setAllTags] = useState<Tag[]>([]);
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+
   const [scoredOpps, setScoredOpps] = useState<OpportunityScore[]>([]);
   const [scoringLoading, setScoringLoading] = useState(false);
 
@@ -282,6 +287,10 @@ export function ApplicantDashboard() {
         githubUrl: data.githubUrl || '',
         skillsSummary: data.skillsSummary || '',
       });
+      getTags().then(setAllTags).catch(console.error);
+      getApplicantTags()
+        .then(tags => setSelectedTagIds(tags.map((t: any) => t.id)))
+        .catch(console.error);
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
@@ -318,6 +327,9 @@ export function ApplicantDashboard() {
     setIsSaving(true);
     try {
       const updated = await updateApplicantProfile(form);
+      if (selectedTagIds.length > 0) {
+        await updateApplicantTags(selectedTagIds);
+      }
       setProfile(updated);
       setIsEditing(false);
       setSuccessMsg('Профиль сохранён');
@@ -482,17 +494,40 @@ export function ApplicantDashboard() {
                 />
               </div>
 
-              {/* Портфолио / Резюме (FR-4.2) */}
+              {/* Портфолио */}
               <div className={styles.textareaGroup}>
-                <label className={styles.textareaLabel}>Ключевые навыки</label>
-                <textarea
-                  className={styles.textarea}
-                  value={form.skillsSummary || ''}
-                  onChange={(e) => handleChange('skillsSummary', e.target.value)}
-                  placeholder="Python, React, SQL, Docker..."
-                  rows={2}
-                />
-              </div>
+                  <label className={styles.textareaLabel}>Навыки (теги)</label>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                    {allTags.map(tag => {
+                      const isSelected = selectedTagIds.includes(tag.id);
+                      return (
+                        <button
+                          key={tag.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedTagIds(prev =>
+                              isSelected
+                                ? prev.filter(id => id !== tag.id)
+                                : [...prev, tag.id]
+                            );
+                          }}
+                          style={{
+                            padding: '0.25rem 0.6rem',
+                            borderRadius: '999px',
+                            border: isSelected ? '2px solid var(--color-accent)' : '1px solid var(--color-border)',
+                            background: isSelected ? 'var(--color-accent-light)' : 'transparent',
+                            color: isSelected ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                            cursor: 'pointer',
+                            fontSize: '0.8rem',
+                            fontWeight: isSelected ? 700 : 400,
+                          }}
+                        >
+                          {tag.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
 
               <div className={styles.formRow}>
                 <Input
