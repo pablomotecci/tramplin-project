@@ -667,7 +667,7 @@ export function ApplicantDashboard() {
                     borderRadius: '999px', background: 'var(--color-accent-light)',
                     color: 'var(--color-accent)', flexShrink: 0,
                   }}>
-                    {Math.round(opp.score)}% совпадение
+                    {Math.round(opp.score * 100)}% совпадение
                   </span>
                 </div>
               ))}
