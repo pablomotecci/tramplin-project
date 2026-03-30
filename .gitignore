@@ -1,0 +1,34 @@
+# ============================================================
+# .gitignore для tramplin-backend
+# ============================================================
+
+# Сборка
+tramplin-backend/target/
+build/
+*.class
+*.jar
+*.war
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+
+# Переменные окружения с секретами
+.env.properties
+.env
+
+# Логи
+*.log
+logs/
+
+# Загрузки пользователей
+uploads/
+
+# Docker volumes
+postgres_data/
+
+# OS
+.DS_Store
+Thumbs.db

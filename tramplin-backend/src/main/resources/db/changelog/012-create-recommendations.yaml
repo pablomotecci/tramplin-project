@@ -1,0 +1,57 @@
+databaseChangeLog:
+  - changeSet:
+      id: 012-create-recommendations
+      author: tramplin
+      comment: "Таблица рекомендаций — соискатель рекомендует контакт на вакансию"
+      changes:
+        - createTable:
+            tableName: recommendations
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: recommender_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_recommendations_recommender
+                    references: applicant_profiles(id)
+              - column:
+                  name: recommended_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_recommendations_recommended
+                    references: applicant_profiles(id)
+              - column:
+                  name: opportunity_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_recommendations_opportunity
+                    references: opportunities(id)
+              - column:
+                  name: message
+                  type: text
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+        - addUniqueConstraint:
+            tableName: recommendations
+            columnNames: recommender_id, recommended_id, opportunity_id
+            constraintName: uq_recommendation_unique

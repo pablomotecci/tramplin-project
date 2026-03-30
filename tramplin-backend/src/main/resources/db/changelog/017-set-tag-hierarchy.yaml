@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: set-tag-hierarchy
+      author: deadline_kids
+      comment: "Установка parent_id для иерархии тегов: Frontend→React/Vue/Angular, Backend→Spring/Django/FastAPI/NestJS/Node.js, Mobile→Kotlin, Data Science→Python(нет, Python — язык), DevOps→Docker/Kubernetes"
+      changes:
+        - sql:
+            sql: |
+              -- Frontend → React, Vue, Angular
+              UPDATE tags SET parent_id = (SELECT id FROM tags WHERE name = 'Frontend')
+              WHERE name IN ('React', 'Vue', 'Angular') AND parent_id IS NULL;
+
+              -- Backend → Spring, Django, FastAPI, NestJS, Node.js
+              UPDATE tags SET parent_id = (SELECT id FROM tags WHERE name = 'Backend')
+              WHERE name IN ('Spring', 'Django', 'FastAPI', 'NestJS', 'Node.js') AND parent_id IS NULL;
+
+              -- DevOps → Docker, Kubernetes
+              UPDATE tags SET parent_id = (SELECT id FROM tags WHERE name = 'DevOps')
+              WHERE name IN ('Docker', 'Kubernetes') AND parent_id IS NULL;

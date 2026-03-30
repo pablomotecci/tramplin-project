@@ -1,0 +1,60 @@
+databaseChangeLog:
+  - changeSet:
+      id: 011-create-privacy-settings
+      author: tramplin
+      comment: "Таблица настроек приватности профиля соискателя (1:1 с applicant_profiles)"
+      changes:
+        - createTable:
+            tableName: privacy_settings
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: applicant_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    unique: true
+                    foreignKeyName: fk_privacy_settings_applicant
+                    references: applicant_profiles(id)
+              - column:
+                  name: profile_visibility
+                  type: varchar(20)
+                  defaultValue: 'ALL'
+                  constraints:
+                    nullable: false
+              - column:
+                  name: resume_visibility
+                  type: varchar(20)
+                  defaultValue: 'CONTACTS_ONLY'
+                  constraints:
+                    nullable: false
+              - column:
+                  name: applications_visibility
+                  type: varchar(20)
+                  defaultValue: 'NOBODY'
+                  constraints:
+                    nullable: false
+              - column:
+                  name: contacts_visibility
+                  type: varchar(20)
+                  defaultValue: 'CONTACTS_ONLY'
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false

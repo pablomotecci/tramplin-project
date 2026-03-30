@@ -1,0 +1,28 @@
+databaseChangeLog:
+  - changeSet:
+      id: 013-create-applicant-tags
+      author: tramplin
+      comment: "Join-таблица навыков/интересов соискателя (Many-to-Many: applicant_profiles ↔ tags)"
+      changes:
+        - createTable:
+            tableName: applicant_tags
+            columns:
+              - column:
+                  name: applicant_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_applicant_tags_applicant
+                    references: applicant_profiles(id)
+              - column:
+                  name: tag_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_applicant_tags_tag
+                    references: tags(id)
+
+        - addPrimaryKey:
+            tableName: applicant_tags
+            columnNames: applicant_id, tag_id
+            constraintName: pk_applicant_tags

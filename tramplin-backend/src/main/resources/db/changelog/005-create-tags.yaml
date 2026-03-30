@@ -1,0 +1,273 @@
+databaseChangeLog:
+  - changeSet:
+      id: 005-create-tags-table
+      author: deadline_kids
+      comment: "Таблицы тегов, синонимов и связи opportunity-tag"
+      changes:
+        - createTable:
+            tableName: tags
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+                    unique: true
+
+              - column:
+                  name: category
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: approved
+                  type: boolean
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: parent_id
+                  type: uuid
+
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: tags
+            baseColumnNames: parent_id
+            referencedTableName: tags
+            referencedColumnNames: id
+            constraintName: fk_tags_parent
+
+        - createTable:
+            tableName: tag_synonyms
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: synonym
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+                    unique: true
+
+              - column:
+                  name: tag_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: tag_synonyms
+            baseColumnNames: tag_id
+            referencedTableName: tags
+            referencedColumnNames: id
+            constraintName: fk_tag_synonyms_tag
+
+        - createTable:
+            tableName: opportunity_tags
+            columns:
+              - column:
+                  name: opportunity_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: tag_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+
+        - addPrimaryKey:
+            tableName: opportunity_tags
+            columnNames: opportunity_id, tag_id
+            constraintName: pk_opportunity_tags
+
+        - addForeignKeyConstraint:
+            baseTableName: opportunity_tags
+            baseColumnNames: opportunity_id
+            referencedTableName: opportunities
+            referencedColumnNames: id
+            constraintName: fk_opportunity_tags_opportunity
+
+        - addForeignKeyConstraint:
+            baseTableName: opportunity_tags
+            baseColumnNames: tag_id
+            referencedTableName: tags
+            referencedColumnNames: id
+            constraintName: fk_opportunity_tags_tag
+
+      rollback:
+        - dropTable:
+            tableName: opportunity_tags
+        - dropTable:
+            tableName: tag_synonyms
+        - dropTable:
+            tableName: tags
+
+  - changeSet:
+      id: 005-create-tags-indexes
+      author: deadline_kids
+      comment: "Индексы для таблиц тегов"
+      changes:
+        - createIndex:
+            indexName: idx_tags_category
+            tableName: tags
+            columns:
+              - column:
+                  name: category
+
+        - createIndex:
+            indexName: idx_tags_approved
+            tableName: tags
+            columns:
+              - column:
+                  name: approved
+
+        - createIndex:
+            indexName: idx_tag_synonyms_tag_id
+            tableName: tag_synonyms
+            columns:
+              - column:
+                  name: tag_id
+
+      rollback:
+        - dropIndex:
+            indexName: idx_tags_category
+            tableName: tags
+        - dropIndex:
+            indexName: idx_tags_approved
+            tableName: tags
+        - dropIndex:
+            indexName: idx_tag_synonyms_tag_id
+            tableName: tag_synonyms
+
+
+  - changeSet:
+      id: 005-seed-tags
+      author: deadline_kids
+      comment: "Стартовый набор тегов"
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO tags (id, name, category, approved, created_at, updated_at) VALUES
+              (gen_random_uuid(), 'Java', 'LANGUAGE', true, now(), now()),
+              (gen_random_uuid(), 'Python', 'LANGUAGE', true, now(), now()),
+              (gen_random_uuid(), 'JavaScript', 'LANGUAGE', true, now(), now()),
+              (gen_random_uuid(), 'TypeScript', 'LANGUAGE', true, now(), now()),
+              (gen_random_uuid(), 'Go', 'LANGUAGE', true, now(), now()),
+              (gen_random_uuid(), 'C#', 'LANGUAGE', true, now(), now()),
+              (gen_random_uuid(), 'Kotlin', 'LANGUAGE', true, now(), now()),
+              (gen_random_uuid(), 'PHP', 'LANGUAGE', true, now(), now()),
+              (gen_random_uuid(), 'C++', 'LANGUAGE', true, now(), now()),
+              (gen_random_uuid(), 'SQL', 'LANGUAGE', true, now(), now());
+
+              INSERT INTO tags (id, name, category, approved, created_at, updated_at) VALUES
+              (gen_random_uuid(), 'Spring', 'FRAMEWORK', true, now(), now()),
+              (gen_random_uuid(), 'React', 'FRAMEWORK', true, now(), now()),
+              (gen_random_uuid(), 'Django', 'FRAMEWORK', true, now(), now()),
+              (gen_random_uuid(), 'Vue', 'FRAMEWORK', true, now(), now()),
+              (gen_random_uuid(), 'Angular', 'FRAMEWORK', true, now(), now()),
+              (gen_random_uuid(), 'FastAPI', 'FRAMEWORK', true, now(), now()),
+              (gen_random_uuid(), 'NestJS', 'FRAMEWORK', true, now(), now()),
+              (gen_random_uuid(), 'Node.js', 'FRAMEWORK', true, now(), now());
+
+              INSERT INTO tags (id, name, category, approved, created_at, updated_at) VALUES
+              (gen_random_uuid(), 'Junior', 'LEVEL', true, now(), now()),
+              (gen_random_uuid(), 'Middle', 'LEVEL', true, now(), now()),
+              (gen_random_uuid(), 'Senior', 'LEVEL', true, now(), now()),
+              (gen_random_uuid(), 'Intern', 'LEVEL', true, now(), now());
+
+              INSERT INTO tags (id, name, category, approved, created_at, updated_at) VALUES
+              (gen_random_uuid(), 'Полная занятость', 'EMPLOYMENT_TYPE', true, now(), now()),
+              (gen_random_uuid(), 'Частичная занятость', 'EMPLOYMENT_TYPE', true, now(), now()),
+              (gen_random_uuid(), 'Проектная работа', 'EMPLOYMENT_TYPE', true, now(), now());
+
+              INSERT INTO tags (id, name, category, approved, created_at, updated_at) VALUES
+              (gen_random_uuid(), 'Frontend', 'SPECIALIZATION', true, now(), now()),
+              (gen_random_uuid(), 'Backend', 'SPECIALIZATION', true, now(), now()),
+              (gen_random_uuid(), 'Fullstack', 'SPECIALIZATION', true, now(), now()),
+              (gen_random_uuid(), 'DevOps', 'SPECIALIZATION', true, now(), now()),
+              (gen_random_uuid(), 'QA', 'SPECIALIZATION', true, now(), now()),
+              (gen_random_uuid(), 'Data Science', 'SPECIALIZATION', true, now(), now()),
+              (gen_random_uuid(), 'Mobile', 'SPECIALIZATION', true, now(), now());
+
+              INSERT INTO tags (id, name, category, approved, created_at, updated_at) VALUES
+              (gen_random_uuid(), 'Docker', 'TOOL', true, now(), now()),
+              (gen_random_uuid(), 'Git', 'TOOL', true, now(), now()),
+              (gen_random_uuid(), 'Kubernetes', 'TOOL', true, now(), now()),
+              (gen_random_uuid(), 'Linux', 'TOOL', true, now(), now());
+
+              INSERT INTO tags (id, name, category, approved, created_at, updated_at) VALUES
+              (gen_random_uuid(), 'PostgreSQL', 'DATABASE', true, now(), now()),
+              (gen_random_uuid(), 'MongoDB', 'DATABASE', true, now(), now()),
+              (gen_random_uuid(), 'Redis', 'DATABASE', true, now(), now()),
+              (gen_random_uuid(), 'MySQL', 'DATABASE', true, now(), now());
+      rollback:
+        - sql:
+            sql: DELETE FROM tags WHERE approved = true;
+
+
+  - changeSet:
+      id: 005-seed-tag-synonyms
+      author: deadline_kids
+      comment: "Синонимы"
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO tag_synonyms (id, synonym, tag_id, created_at, updated_at)
+              VALUES (gen_random_uuid(), 'JS', (SELECT id FROM tags WHERE name = 'JavaScript'), now(), now()),
+                     (gen_random_uuid(), 'TS', (SELECT id FROM tags WHERE name = 'TypeScript'), now(), now()),
+                     (gen_random_uuid(), 'ReactJS', (SELECT id FROM tags WHERE name = 'React'), now(), now()),
+                     (gen_random_uuid(), 'VueJS', (SELECT id FROM tags WHERE name = 'Vue'), now(), now()),
+                     (gen_random_uuid(), 'Golang', (SELECT id FROM tags WHERE name = 'Go'), now(), now()),
+                     (gen_random_uuid(), 'Postgres', (SELECT id FROM tags WHERE name = 'PostgreSQL'), now(), now()),
+                     (gen_random_uuid(), 'Mongo', (SELECT id FROM tags WHERE name = 'MongoDB'), now(), now()),
+                     (gen_random_uuid(), 'K8s', (SELECT id FROM tags WHERE name = 'Kubernetes'), now(), now()),
+                     (gen_random_uuid(), 'Питон', (SELECT id FROM tags WHERE name = 'Python'), now(), now()),
+                     (gen_random_uuid(), 'Джава', (SELECT id FROM tags WHERE name = 'Java'), now(), now());
+      rollback:
+        - sql:
+            sql: DELETE FROM tag_synonyms;

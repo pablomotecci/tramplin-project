@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: fix-company-verification-status
+      author: deadline_kids
+      comment: "Исправление: APPROVED → VERIFIED (соответствие Java enum VerificationStatus)"
+      changes:
+        - sql:
+            sql: |
+              UPDATE companies SET verification_status = 'VERIFIED' WHERE verification_status = 'APPROVED';

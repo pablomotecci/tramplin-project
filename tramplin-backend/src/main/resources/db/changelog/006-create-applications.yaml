@@ -1,0 +1,97 @@
+databaseChangeLog:
+  - changeSet:
+      id: 006-create-applications-table
+      author: deadline_kids
+      comment: "Таблица откликов соискателей на вакансии"
+      changes:
+        - createTable:
+            tableName: applications
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: applicant_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: opportunity_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: status
+                  type: VARCHAR(30)
+                  defaultValue: 'PENDING'
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: cover_letter
+                  type: TEXT
+
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+        - addUniqueConstraint:
+            tableName: applications
+            columnNames: applicant_id, opportunity_id
+            constraintName: uq_applications_applicant_opportunity
+
+        - addForeignKeyConstraint:
+            baseTableName: applications
+            baseColumnNames: applicant_id
+            referencedTableName: applicant_profiles
+            referencedColumnNames: id
+            constraintName: fk_applications_applicant
+
+        - addForeignKeyConstraint:
+            baseTableName: applications
+            baseColumnNames: opportunity_id
+            referencedTableName: opportunities
+            referencedColumnNames: id
+            constraintName: fk_applications_opportunity
+
+        - createIndex:
+            indexName: idx_applications_applicant_id
+            tableName: applications
+            columns:
+              - column:
+                  name: applicant_id
+
+        - createIndex:
+            indexName: idx_applications_opportunity_id
+            tableName: applications
+            columns:
+              - column:
+                  name: opportunity_id
+
+        - createIndex:
+            indexName: idx_applications_status
+            tableName: applications
+            columns:
+              - column:
+                  name: status
+
+      rollback:
+        - dropTable:
+            tableName: applications

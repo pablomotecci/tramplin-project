@@ -1,0 +1,27 @@
+databaseChangeLog:
+  - changeSet:
+      id: 014-add-media-to-opportunities
+      author: tramplin
+      comment: "Медиаконтент в карточке возможности"
+      changes:
+        - addColumn:
+            tableName: opportunities
+            columns:
+              - column:
+                  name: media_urls
+                  type: text
+
+  - changeSet:
+      id: 014-add-media-to-companies
+      author: tramplin
+      comment: "Фото офиса и видеопрезентация компании (авторское решение)"
+      changes:
+        - addColumn:
+            tableName: companies
+            columns:
+              - column:
+                  name: office_photos
+                  type: text
+              - column:
+                  name: video_url
+                  type: varchar(500)

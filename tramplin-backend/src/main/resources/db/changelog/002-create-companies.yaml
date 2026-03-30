@@ -1,0 +1,111 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-create-companies-table
+      author: deadline_kids
+      comment: "Таблица профилей работодателей (Связь 1:1 с users)"
+      changes:
+        - createTable:
+            tableName: companies
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    unique: true
+
+              - column:
+                  name: company_name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: description
+                  type: TEXT
+
+              - column:
+                  name: industry
+                  type: VARCHAR(100)
+
+              - column:
+                  name: inn
+                  type: VARCHAR(12)
+                  constraints:
+                    unique: true
+
+              - column:
+                  name: website_url
+                  type: VARCHAR(255)
+
+              - column:
+                  name: logo_url
+                  type: VARCHAR(255)
+
+              - column:
+                  name: city
+                  type: VARCHAR(100)
+
+              - column:
+                  name: address
+                  type: VARCHAR(500)
+
+              - column:
+                  name: phone
+                  type: VARCHAR(20)
+
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+
+              - column:
+                  name: location
+                  type: geometry(Point, 4326)
+
+              - column:
+                  name: verification_status
+                  type: VARCHAR(20)
+                  defaultValue: 'UNVERIFIED'
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: companies
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_companies_user
+
+        - createIndex:
+            indexName: idx_companies_location
+            tableName: companies
+            columns:
+              - column:
+                  name: location
+            indexType: GIST
+
+      rollback:
+        - dropTable:
+            tableName: companies

@@ -1,0 +1,393 @@
+databaseChangeLog:
+  # Пароль для всех: Test1234!
+
+  # --- 5 РАБОТОДАТЕЛЕЙ (users) ---
+  - changeSet:
+      id: seed-employer-users
+      author: seed
+      context: seed
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM users WHERE email = 'hr@yandex.ru'"
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO users (id, email, display_name, password_hash, role, status, created_at, updated_at) VALUES
+              (gen_random_uuid(), 'hr@yandex.ru',     'Яндекс HR',     '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'EMPLOYER', 'ACTIVE', now(), now()),
+              (gen_random_uuid(), 'hr@vk.com',        'VK HR',         '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'EMPLOYER', 'ACTIVE', now(), now()),
+              (gen_random_uuid(), 'hr@sber.ru',       'Сбер HR',       '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'EMPLOYER', 'ACTIVE', now(), now()),
+              (gen_random_uuid(), 'hr@tinkoff.ru',    'Тинькофф HR',   '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'EMPLOYER', 'ACTIVE', now(), now()),
+              (gen_random_uuid(), 'hr@kaspersky.ru',  'Касперский HR', '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'EMPLOYER', 'ACTIVE', now(), now());
+
+  # --- 5 КОМПАНИЙ (companies) ---
+  - changeSet:
+      id: seed-companies
+      author: seed
+      context: seed
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO companies (id, user_id, company_name, industry, inn, city, address, verification_status, location, created_at, updated_at) VALUES
+              (gen_random_uuid(), (SELECT id FROM users WHERE email = 'hr@yandex.ru'),    'Яндекс',                   'IT',               '7736207543', 'Москва', 'ул. Льва Толстого, 16',       'APPROVED', ST_SetSRID(ST_MakePoint(37.5876, 55.7339), 4326), now(), now()),
+              (gen_random_uuid(), (SELECT id FROM users WHERE email = 'hr@vk.com'),       'VK',                       'IT',               '7743001840', 'Москва', 'Ленинградский пр-т, 39',      'APPROVED', ST_SetSRID(ST_MakePoint(37.5375, 55.7932), 4326), now(), now()),
+              (gen_random_uuid(), (SELECT id FROM users WHERE email = 'hr@sber.ru'),      'Сбер',                     'Финтех',           '7707083893', 'Москва', 'ул. Вавилова, 19',            'APPROVED', ST_SetSRID(ST_MakePoint(37.5874, 55.6953), 4326), now(), now()),
+              (gen_random_uuid(), (SELECT id FROM users WHERE email = 'hr@tinkoff.ru'),   'Тинькофф',                 'Финтех',           '7710140679', 'Москва', '1-й Волоколамский пр-д, 10',  'APPROVED', ST_SetSRID(ST_MakePoint(37.4955, 55.8072), 4326), now(), now()),
+              (gen_random_uuid(), (SELECT id FROM users WHERE email = 'hr@kaspersky.ru'), 'Лаборатория Касперского',  'Кибербезопасность','7713140469', 'Москва', 'Ленинградское ш., 39А',       'APPROVED', ST_SetSRID(ST_MakePoint(37.4905, 55.8100), 4326), now(), now());
+
+  # --- 10 СОИСКАТЕЛЕЙ (users) ---
+  - changeSet:
+      id: seed-applicant-users
+      author: seed
+      context: seed
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO users (id, email, display_name, password_hash, role, status, created_at, updated_at) VALUES
+              (gen_random_uuid(), 'ivan.petrov@mail.ru',       'Иван Петров',      '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'APPLICANT', 'ACTIVE', now(), now()),
+              (gen_random_uuid(), 'maria.sidorova@mail.ru',    'Мария Сидорова',    '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'APPLICANT', 'ACTIVE', now(), now()),
+              (gen_random_uuid(), 'alex.kozlov@gmail.com',     'Алексей Козлов',    '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'APPLICANT', 'ACTIVE', now(), now()),
+              (gen_random_uuid(), 'elena.volkova@mail.ru',     'Елена Волкова',     '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'APPLICANT', 'ACTIVE', now(), now()),
+              (gen_random_uuid(), 'dmitry.novikov@gmail.com',  'Дмитрий Новиков',   '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'APPLICANT', 'ACTIVE', now(), now()),
+              (gen_random_uuid(), 'anna.morozova@mail.ru',     'Анна Морозова',     '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'APPLICANT', 'ACTIVE', now(), now()),
+              (gen_random_uuid(), 'sergey.ivanov@gmail.com',   'Сергей Иванов',     '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'APPLICANT', 'ACTIVE', now(), now()),
+              (gen_random_uuid(), 'olga.kuznetsova@mail.ru',   'Ольга Кузнецова',   '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'APPLICANT', 'ACTIVE', now(), now()),
+              (gen_random_uuid(), 'nikita.sokolov@gmail.com',  'Никита Соколов',    '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'APPLICANT', 'ACTIVE', now(), now()),
+              (gen_random_uuid(), 'daria.popova@mail.ru',      'Дарья Попова',      '$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy', 'APPLICANT', 'ACTIVE', now(), now());
+
+  # --- 10 ПРОФИЛЕЙ СОИСКАТЕЛЕЙ (applicant_profiles) ---
+  - changeSet:
+      id: seed-applicant-profiles
+      author: seed
+      context: seed
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO applicant_profiles (id, user_id, first_name, last_name, university, course, graduation_year, bio, created_at, updated_at) VALUES
+              (gen_random_uuid(), (SELECT id FROM users WHERE email = 'ivan.petrov@mail.ru'),      'Иван',    'Петров',    'МГТУ им. Баумана', 4, 2026, 'Backend-разработчик на Java/Spring. Опыт: REST API, PostgreSQL, Docker.',         now(), now()),
+              (gen_random_uuid(), (SELECT id FROM users WHERE email = 'maria.sidorova@mail.ru'),   'Мария',   'Сидорова',  'МГУ',              3, 2027, 'Frontend-разработчик. React, TypeScript, адаптивная вёрстка.',                     now(), now()),
+              (gen_random_uuid(), (SELECT id FROM users WHERE email = 'alex.kozlov@gmail.com'),    'Алексей', 'Козлов',    'МФТИ',             4, 2026, 'Fullstack: Python/Django + React. Участник хакатонов.',                            now(), now()),
+              (gen_random_uuid(), (SELECT id FROM users WHERE email = 'elena.volkova@mail.ru'),    'Елена',   'Волкова',   'ВШЭ',              2, 2028, 'Data Science. Python, SQL, основы ML. Ищу первую стажировку.',                     now(), now()),
+              (gen_random_uuid(), (SELECT id FROM users WHERE email = 'dmitry.novikov@gmail.com'), 'Дмитрий', 'Новиков',   'ИТМО',             4, 2026, 'DevOps/SRE. Linux, Docker, Kubernetes, CI/CD. Опыт работы с облаками.',            now(), now()),
+              (gen_random_uuid(), (SELECT id FROM users WHERE email = 'anna.morozova@mail.ru'),    'Анна',    'Морозова',  'СПбГУ',            3, 2027, 'QA-инженер. Ручное и автоматизированное тестирование. Python, Selenium.',           now(), now()),
+              (gen_random_uuid(), (SELECT id FROM users WHERE email = 'sergey.ivanov@gmail.com'),  'Сергей',  'Иванов',    'НГУ',              5, 2026, 'Backend на Go и Python. Микросервисы, gRPC, PostgreSQL.',                           now(), now()),
+              (gen_random_uuid(), (SELECT id FROM users WHERE email = 'olga.kuznetsova@mail.ru'),  'Ольга',   'Кузнецова', 'КФУ',              4, 2026, 'Mobile-разработчик. Kotlin, Android. Опыт с Jetpack Compose.',                     now(), now()),
+              (gen_random_uuid(), (SELECT id FROM users WHERE email = 'nikita.sokolov@gmail.com'), 'Никита',  'Соколов',   'УрФУ',             3, 2027, 'Frontend: Vue.js, JavaScript, Node.js. Интересует fullstack.',                     now(), now()),
+              (gen_random_uuid(), (SELECT id FROM users WHERE email = 'daria.popova@mail.ru'),     'Дарья',   'Попова',    'МГТУ МИРЭА',       2, 2028, 'Начинающий разработчик. Python, основы web. Хочу попасть в Data Science.',          now(), now());
+
+  # --- 10 PRIVACY SETTINGS ---
+  - changeSet:
+      id: seed-privacy-settings
+      author: seed
+      context: seed
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO privacy_settings (id, applicant_id, profile_visibility, resume_visibility, applications_visibility, contacts_visibility, created_at, updated_at)
+              SELECT gen_random_uuid(), ap.id, 'ALL', 'CONTACTS_ONLY', 'NOBODY', 'CONTACTS_ONLY', now(), now()
+              FROM applicant_profiles ap
+              JOIN users u ON ap.user_id = u.id
+              WHERE u.role = 'APPLICANT'
+              AND NOT EXISTS (SELECT 1 FROM privacy_settings ps WHERE ps.applicant_id = ap.id);
+
+  # --- 20 ВОЗМОЖНОСТЕЙ (opportunities) ---
+  - changeSet:
+      id: seed-opportunities
+      author: seed
+      context: seed
+      changes:
+        - sql:
+            sql: |
+              -- Яндекс
+              INSERT INTO opportunities (id, employer_id, title, description, type, work_format, status, city, address, location, salary_min, salary_max, published_at, contact_email, created_at, updated_at) VALUES
+              (gen_random_uuid(), (SELECT id FROM companies WHERE company_name = 'Яндекс'), 'Java Backend Developer (стажёр)',       'Разработка backend-сервисов на Java/Spring Boot. Работа с PostgreSQL, Kafka, Docker.', 'INTERNSHIP', 'OFFICE', 'ACTIVE', 'Москва', 'ул. Льва Толстого, 16',       ST_SetSRID(ST_MakePoint(37.5876, 55.7339), 4326), 60000, 90000, now(), 'hr@yandex.ru', now(), now()),
+              (gen_random_uuid(), (SELECT id FROM companies WHERE company_name = 'Яндекс'), 'Frontend React Developer',              'Разработка UI-компонентов на React/TypeScript. Code review, написание тестов.',         'VACANCY',    'HYBRID', 'ACTIVE', 'Москва', 'ул. Льва Толстого, 16',       ST_SetSRID(ST_MakePoint(37.5876, 55.7339), 4326), 80000, 150000, now(), 'hr@yandex.ru', now(), now()),
+              (gen_random_uuid(), (SELECT id FROM companies WHERE company_name = 'Яндекс'), 'Data Analyst Intern',                   'Анализ данных, построение дашбордов, SQL-запросы. Python + pandas.',                    'INTERNSHIP', 'OFFICE', 'ACTIVE', 'Москва', 'ул. Льва Толстого, 16',       ST_SetSRID(ST_MakePoint(37.5876, 55.7339), 4326), 50000, 70000, now(), 'hr@yandex.ru', now(), now()),
+              (gen_random_uuid(), (SELECT id FROM companies WHERE company_name = 'Яндекс'), 'Яндекс Open Day: Backend',              'День открытых дверей для backend-разработчиков. Лекции, нетворкинг, мини-хакатон.',     'EVENT',      'OFFICE', 'ACTIVE', 'Москва', 'ул. Льва Толстого, 16',       ST_SetSRID(ST_MakePoint(37.5876, 55.7339), 4326), NULL, NULL, now(), 'hr@yandex.ru', now(), now()),
+
+              -- VK
+              (gen_random_uuid(), (SELECT id FROM companies WHERE company_name = 'VK'), 'Python Backend Developer',              'Разработка API на Python/FastAPI. Интеграция с микросервисами.',                        'VACANCY',    'HYBRID', 'ACTIVE', 'Москва', 'Ленинградский пр-т, 39',      ST_SetSRID(ST_MakePoint(37.5375, 55.7932), 4326), 90000, 160000, now(), 'hr@vk.com', now(), now()),
+              (gen_random_uuid(), (SELECT id FROM companies WHERE company_name = 'VK'), 'Frontend Vue.js стажёр',                'Стажировка в команде фронтенда. Vue 3, TypeScript, Vuex.',                              'INTERNSHIP', 'OFFICE', 'ACTIVE', 'Москва', 'Ленинградский пр-т, 39',      ST_SetSRID(ST_MakePoint(37.5375, 55.7932), 4326), 45000, 65000, now(), 'hr@vk.com', now(), now()),
+              (gen_random_uuid(), (SELECT id FROM companies WHERE company_name = 'VK'), 'DevOps Engineer',                       'Настройка CI/CD, Docker, Kubernetes. Мониторинг и логирование.',                        'VACANCY',    'REMOTE', 'ACTIVE', 'Москва', 'Ленинградский пр-т, 39',      ST_SetSRID(ST_MakePoint(37.5375, 55.7932), 4326), 120000, 200000, now(), 'hr@vk.com', now(), now()),
+              (gen_random_uuid(), (SELECT id FROM companies WHERE company_name = 'VK'), 'Менторство: Mobile Development',        'Индивидуальное менторство по Android/Kotlin разработке. 3 месяца.',                     'MENTORSHIP', 'REMOTE', 'ACTIVE', 'Москва', 'Ленинградский пр-т, 39',      ST_SetSRID(ST_MakePoint(37.5375, 55.7932), 4326), NULL, NULL, now(), 'hr@vk.com', now(), now()),
+
+              -- Сбер
+              (gen_random_uuid(), (SELECT id FROM companies WHERE company_name = 'Сбер'), 'Java Developer (Middle)',              'Разработка банковских сервисов на Java/Spring. Микросервисная архитектура.',             'VACANCY',    'OFFICE', 'ACTIVE', 'Москва', 'ул. Вавилова, 19',            ST_SetSRID(ST_MakePoint(37.5874, 55.6953), 4326), 150000, 250000, now(), 'hr@sber.ru', now(), now()),
+              (gen_random_uuid(), (SELECT id FROM companies WHERE company_name = 'Сбер'), 'Data Science стажёр',                  'Стажировка в команде ML. Python, scikit-learn, NLP-задачи.',                           'INTERNSHIP', 'HYBRID', 'ACTIVE', 'Москва', 'ул. Вавилова, 19',            ST_SetSRID(ST_MakePoint(37.5874, 55.6953), 4326), 55000, 80000, now(), 'hr@sber.ru', now(), now()),
+              (gen_random_uuid(), (SELECT id FROM companies WHERE company_name = 'Сбер'), 'QA Automation Engineer',               'Автоматизация тестирования. Java/Python, Selenium, CI/CD интеграция.',                  'VACANCY',    'HYBRID', 'ACTIVE', 'Москва', 'ул. Вавилова, 19',            ST_SetSRID(ST_MakePoint(37.5874, 55.6953), 4326), 100000, 170000, now(), 'hr@sber.ru', now(), now()),
+              (gen_random_uuid(), (SELECT id FROM companies WHERE company_name = 'Сбер'), 'Сбер IT Day',                          'Конференция для студентов: доклады, мастер-классы, стенды команд.',                     'EVENT',      'OFFICE', 'ACTIVE', 'Москва', 'ул. Вавилова, 19',            ST_SetSRID(ST_MakePoint(37.5874, 55.6953), 4326), NULL, NULL, now(), 'hr@sber.ru', now(), now()),
+
+              -- Тинькофф
+              (gen_random_uuid(), (SELECT id FROM companies WHERE company_name = 'Тинькофф'), 'Kotlin Backend Developer',         'Разработка сервисов на Kotlin/Spring. REST, gRPC, PostgreSQL.',                         'VACANCY',    'HYBRID', 'ACTIVE', 'Москва', '1-й Волоколамский пр-д, 10',  ST_SetSRID(ST_MakePoint(37.4955, 55.8072), 4326), 130000, 220000, now(), 'hr@tinkoff.ru', now(), now()),
+              (gen_random_uuid(), (SELECT id FROM companies WHERE company_name = 'Тинькофф'), 'Frontend React стажёр',            'Стажировка в финтех-продукте. React, TypeScript, дизайн-система.',                     'INTERNSHIP', 'OFFICE', 'ACTIVE', 'Москва', '1-й Волоколамский пр-д, 10',  ST_SetSRID(ST_MakePoint(37.4955, 55.8072), 4326), 50000, 75000, now(), 'hr@tinkoff.ru', now(), now()),
+              (gen_random_uuid(), (SELECT id FROM companies WHERE company_name = 'Тинькофф'), 'Fullstack Developer (Node.js + React)', 'Разработка внутренних инструментов. Node.js, React, PostgreSQL.',                  'VACANCY',    'REMOTE', 'ACTIVE', 'Москва', '1-й Волоколамский пр-д, 10',  ST_SetSRID(ST_MakePoint(37.4955, 55.8072), 4326), 110000, 190000, now(), 'hr@tinkoff.ru', now(), now()),
+              (gen_random_uuid(), (SELECT id FROM companies WHERE company_name = 'Тинькофф'), 'Менторство: Data Science',          'Индивидуальное менторство по ML/DS. Python, pandas, модели.',                          'MENTORSHIP', 'REMOTE', 'ACTIVE', 'Москва', '1-й Волоколамский пр-д, 10',  ST_SetSRID(ST_MakePoint(37.4955, 55.8072), 4326), NULL, NULL, now(), 'hr@tinkoff.ru', now(), now()),
+
+              -- Касперский
+              (gen_random_uuid(), (SELECT id FROM companies WHERE company_name = 'Лаборатория Касперского'), 'C++ Developer',                      'Разработка ядра антивирусного движка. C++, Linux, многопоточность.',                    'VACANCY',    'OFFICE', 'ACTIVE', 'Москва', 'Ленинградское ш., 39А',       ST_SetSRID(ST_MakePoint(37.4905, 55.8100), 4326), 140000, 230000, now(), 'hr@kaspersky.ru', now(), now()),
+              (gen_random_uuid(), (SELECT id FROM companies WHERE company_name = 'Лаборатория Касперского'), 'Security Analyst стажёр',             'Анализ угроз, реверс-инжиниринг. Базовые знания сетей и Linux.',                       'INTERNSHIP', 'OFFICE', 'ACTIVE', 'Москва', 'Ленинградское ш., 39А',       ST_SetSRID(ST_MakePoint(37.4905, 55.8100), 4326), 50000, 70000, now(), 'hr@kaspersky.ru', now(), now()),
+              (gen_random_uuid(), (SELECT id FROM companies WHERE company_name = 'Лаборатория Касперского'), 'Go Backend Developer',                'Разработка облачных сервисов на Go. REST API, Docker, K8s.',                           'VACANCY',    'HYBRID', 'ACTIVE', 'Москва', 'Ленинградское ш., 39А',       ST_SetSRID(ST_MakePoint(37.4905, 55.8100), 4326), 130000, 210000, now(), 'hr@kaspersky.ru', now(), now()),
+              (gen_random_uuid(), (SELECT id FROM companies WHERE company_name = 'Лаборатория Касперского'), 'Kaspersky Security Meetup',           'Митап по кибербезопасности. CTF, доклады, карьерные консультации.',                    'EVENT',      'OFFICE', 'ACTIVE', 'Москва', 'Ленинградское ш., 39А',       ST_SetSRID(ST_MakePoint(37.4905, 55.8100), 4326), NULL, NULL, now(), 'hr@kaspersky.ru', now(), now());
+
+  # --- OPPORTUNITY_TAGS ---
+  - changeSet:
+      id: seed-opportunity-tags
+      author: seed
+      context: seed
+      changes:
+        - sql:
+            sql: |
+              -- Яндекс: Java Backend стажёр → Java, Spring, PostgreSQL, Docker, Intern
+              INSERT INTO opportunity_tags (opportunity_id, tag_id)
+              SELECT o.id, t.id FROM opportunities o, tags t
+              WHERE o.title = 'Java Backend Developer (стажёр)' AND t.name IN ('Java', 'Spring', 'PostgreSQL', 'Docker', 'Intern');
+
+              -- Яндекс: Frontend React → React, TypeScript, JavaScript, Frontend, Junior
+              INSERT INTO opportunity_tags (opportunity_id, tag_id)
+              SELECT o.id, t.id FROM opportunities o, tags t
+              WHERE o.title = 'Frontend React Developer' AND t.name IN ('React', 'TypeScript', 'JavaScript', 'Frontend', 'Junior');
+
+              -- Яндекс: Data Analyst Intern → Python, SQL, Data Science, Intern
+              INSERT INTO opportunity_tags (opportunity_id, tag_id)
+              SELECT o.id, t.id FROM opportunities o, tags t
+              WHERE o.title = 'Data Analyst Intern' AND t.name IN ('Python', 'SQL', 'Data Science', 'Intern');
+
+              -- Яндекс: Open Day → Java, Spring, Backend
+              INSERT INTO opportunity_tags (opportunity_id, tag_id)
+              SELECT o.id, t.id FROM opportunities o, tags t
+              WHERE o.title = 'Яндекс Open Day: Backend' AND t.name IN ('Java', 'Spring', 'Backend');
+
+              -- VK: Python Backend → Python, FastAPI, PostgreSQL, Backend, Middle
+              INSERT INTO opportunity_tags (opportunity_id, tag_id)
+              SELECT o.id, t.id FROM opportunities o, tags t
+              WHERE o.title = 'Python Backend Developer' AND t.name IN ('Python', 'FastAPI', 'PostgreSQL', 'Backend', 'Middle');
+
+              -- VK: Vue.js стажёр → Vue, TypeScript, JavaScript, Frontend, Intern
+              INSERT INTO opportunity_tags (opportunity_id, tag_id)
+              SELECT o.id, t.id FROM opportunities o, tags t
+              WHERE o.title = 'Frontend Vue.js стажёр' AND t.name IN ('Vue', 'TypeScript', 'JavaScript', 'Frontend', 'Intern');
+
+              -- VK: DevOps → Docker, Kubernetes, Linux, DevOps, Middle
+              INSERT INTO opportunity_tags (opportunity_id, tag_id)
+              SELECT o.id, t.id FROM opportunities o, tags t
+              WHERE o.title = 'DevOps Engineer' AND t.name IN ('Docker', 'Kubernetes', 'Linux', 'DevOps', 'Middle');
+
+              -- VK: Менторство Mobile → Kotlin, Mobile, Android
+              INSERT INTO opportunity_tags (opportunity_id, tag_id)
+              SELECT o.id, t.id FROM opportunities o, tags t
+              WHERE o.title = 'Менторство: Mobile Development' AND t.name IN ('Kotlin', 'Mobile');
+
+              -- Сбер: Java Middle → Java, Spring, PostgreSQL, Backend, Middle
+              INSERT INTO opportunity_tags (opportunity_id, tag_id)
+              SELECT o.id, t.id FROM opportunities o, tags t
+              WHERE o.title = 'Java Developer (Middle)' AND t.name IN ('Java', 'Spring', 'PostgreSQL', 'Backend', 'Middle');
+
+              -- Сбер: DS стажёр → Python, SQL, Data Science, Intern
+              INSERT INTO opportunity_tags (opportunity_id, tag_id)
+              SELECT o.id, t.id FROM opportunities o, tags t
+              WHERE o.title = 'Data Science стажёр' AND t.name IN ('Python', 'SQL', 'Data Science', 'Intern');
+
+              -- Сбер: QA Automation → Java, Python, QA, Junior
+              INSERT INTO opportunity_tags (opportunity_id, tag_id)
+              SELECT o.id, t.id FROM opportunities o, tags t
+              WHERE o.title = 'QA Automation Engineer' AND t.name IN ('Java', 'Python', 'QA', 'Junior');
+
+              -- Сбер: IT Day → Java, Python, Backend
+              INSERT INTO opportunity_tags (opportunity_id, tag_id)
+              SELECT o.id, t.id FROM opportunities o, tags t
+              WHERE o.title = 'Сбер IT Day' AND t.name IN ('Java', 'Python', 'Backend');
+
+              -- Тинькофф: Kotlin Backend → Kotlin, Spring, PostgreSQL, Backend, Middle
+              INSERT INTO opportunity_tags (opportunity_id, tag_id)
+              SELECT o.id, t.id FROM opportunities o, tags t
+              WHERE o.title = 'Kotlin Backend Developer' AND t.name IN ('Kotlin', 'Spring', 'PostgreSQL', 'Backend', 'Middle');
+
+              -- Тинькофф: React стажёр → React, TypeScript, JavaScript, Frontend, Intern
+              INSERT INTO opportunity_tags (opportunity_id, tag_id)
+              SELECT o.id, t.id FROM opportunities o, tags t
+              WHERE o.title = 'Frontend React стажёр' AND t.name IN ('React', 'TypeScript', 'JavaScript', 'Frontend', 'Intern');
+
+              -- Тинькофф: Fullstack → Node.js, React, PostgreSQL, Fullstack, Junior
+              INSERT INTO opportunity_tags (opportunity_id, tag_id)
+              SELECT o.id, t.id FROM opportunities o, tags t
+              WHERE o.title = 'Fullstack Developer (Node.js + React)' AND t.name IN ('Node.js', 'React', 'PostgreSQL', 'Fullstack', 'Junior');
+
+              -- Тинькофф: Менторство DS → Python, Data Science
+              INSERT INTO opportunity_tags (opportunity_id, tag_id)
+              SELECT o.id, t.id FROM opportunities o, tags t
+              WHERE o.title = 'Менторство: Data Science' AND t.name IN ('Python', 'Data Science');
+
+              -- Касперский: C++ Developer → C++, Linux, Backend, Middle
+              INSERT INTO opportunity_tags (opportunity_id, tag_id)
+              SELECT o.id, t.id FROM opportunities o, tags t
+              WHERE o.title = 'C++ Developer' AND t.name IN ('C++', 'Linux', 'Backend', 'Middle');
+
+              -- Касперский: Security стажёр → Linux, Python, Intern
+              INSERT INTO opportunity_tags (opportunity_id, tag_id)
+              SELECT o.id, t.id FROM opportunities o, tags t
+              WHERE o.title = 'Security Analyst стажёр' AND t.name IN ('Linux', 'Python', 'Intern');
+
+              -- Касперский: Go Backend → Go, Docker, Kubernetes, Backend, Middle
+              INSERT INTO opportunity_tags (opportunity_id, tag_id)
+              SELECT o.id, t.id FROM opportunities o, tags t
+              WHERE o.title = 'Go Backend Developer' AND t.name IN ('Go', 'Docker', 'Kubernetes', 'Backend', 'Middle');
+
+              -- Касперский: Security Meetup → Linux, Python
+              INSERT INTO opportunity_tags (opportunity_id, tag_id)
+              SELECT o.id, t.id FROM opportunities o, tags t
+              WHERE o.title = 'Kaspersky Security Meetup' AND t.name IN ('Linux', 'Python');
+
+  # --- APPLICANT_TAGS ---
+  - changeSet:
+      id: seed-applicant-tags
+      author: seed
+      context: seed
+      changes:
+        - sql:
+            sql: |
+              -- Иван Петров: Java, Spring, PostgreSQL, Docker, Backend, Junior
+              INSERT INTO applicant_tags (applicant_id, tag_id)
+              SELECT ap.id, t.id FROM applicant_profiles ap JOIN users u ON ap.user_id = u.id, tags t
+              WHERE u.email = 'ivan.petrov@mail.ru' AND t.name IN ('Java', 'Spring', 'PostgreSQL', 'Docker', 'Backend', 'Junior');
+
+              -- Мария Сидорова: React, TypeScript, JavaScript, Frontend, Junior
+              INSERT INTO applicant_tags (applicant_id, tag_id)
+              SELECT ap.id, t.id FROM applicant_profiles ap JOIN users u ON ap.user_id = u.id, tags t
+              WHERE u.email = 'maria.sidorova@mail.ru' AND t.name IN ('React', 'TypeScript', 'JavaScript', 'Frontend', 'Junior');
+
+              -- Алексей Козлов: Python, Django, React, JavaScript, Fullstack, Junior
+              INSERT INTO applicant_tags (applicant_id, tag_id)
+              SELECT ap.id, t.id FROM applicant_profiles ap JOIN users u ON ap.user_id = u.id, tags t
+              WHERE u.email = 'alex.kozlov@gmail.com' AND t.name IN ('Python', 'Django', 'React', 'JavaScript', 'Fullstack', 'Junior');
+
+              -- Елена Волкова: Python, SQL, Data Science, Intern
+              INSERT INTO applicant_tags (applicant_id, tag_id)
+              SELECT ap.id, t.id FROM applicant_profiles ap JOIN users u ON ap.user_id = u.id, tags t
+              WHERE u.email = 'elena.volkova@mail.ru' AND t.name IN ('Python', 'SQL', 'Data Science', 'Intern');
+
+              -- Дмитрий Новиков: Linux, Docker, Kubernetes, Git, DevOps, Junior
+              INSERT INTO applicant_tags (applicant_id, tag_id)
+              SELECT ap.id, t.id FROM applicant_profiles ap JOIN users u ON ap.user_id = u.id, tags t
+              WHERE u.email = 'dmitry.novikov@gmail.com' AND t.name IN ('Linux', 'Docker', 'Kubernetes', 'Git', 'DevOps', 'Junior');
+
+              -- Анна Морозова: Python, Java, QA, Git, Intern
+              INSERT INTO applicant_tags (applicant_id, tag_id)
+              SELECT ap.id, t.id FROM applicant_profiles ap JOIN users u ON ap.user_id = u.id, tags t
+              WHERE u.email = 'anna.morozova@mail.ru' AND t.name IN ('Python', 'Java', 'QA', 'Git', 'Intern');
+
+              -- Сергей Иванов: Go, Python, PostgreSQL, Docker, Backend, Middle
+              INSERT INTO applicant_tags (applicant_id, tag_id)
+              SELECT ap.id, t.id FROM applicant_profiles ap JOIN users u ON ap.user_id = u.id, tags t
+              WHERE u.email = 'sergey.ivanov@gmail.com' AND t.name IN ('Go', 'Python', 'PostgreSQL', 'Docker', 'Backend', 'Middle');
+
+              -- Ольга Кузнецова: Kotlin, Java, Mobile, Git, Junior
+              INSERT INTO applicant_tags (applicant_id, tag_id)
+              SELECT ap.id, t.id FROM applicant_profiles ap JOIN users u ON ap.user_id = u.id, tags t
+              WHERE u.email = 'olga.kuznetsova@mail.ru' AND t.name IN ('Kotlin', 'Java', 'Mobile', 'Git', 'Junior');
+
+              -- Никита Соколов: Vue, JavaScript, Node.js, TypeScript, Frontend, Intern
+              INSERT INTO applicant_tags (applicant_id, tag_id)
+              SELECT ap.id, t.id FROM applicant_profiles ap JOIN users u ON ap.user_id = u.id, tags t
+              WHERE u.email = 'nikita.sokolov@gmail.com' AND t.name IN ('Vue', 'JavaScript', 'Node.js', 'TypeScript', 'Frontend', 'Intern');
+
+              -- Дарья Попова: Python, SQL, Git, Intern
+              INSERT INTO applicant_tags (applicant_id, tag_id)
+              SELECT ap.id, t.id FROM applicant_profiles ap JOIN users u ON ap.user_id = u.id, tags t
+              WHERE u.email = 'daria.popova@mail.ru' AND t.name IN ('Python', 'SQL', 'Git', 'Intern');
+
+  # --- 5 ОТКЛИКОВ (applications) ---
+  - changeSet:
+      id: seed-applications
+      author: seed
+      context: seed
+      changes:
+        - sql:
+            sql: |
+              -- Иван → Яндекс Java стажёр (ACCEPTED)
+              INSERT INTO applications (id, applicant_id, opportunity_id, status, cover_letter, created_at, updated_at)
+              SELECT gen_random_uuid(),
+                     (SELECT ap.id FROM applicant_profiles ap JOIN users u ON ap.user_id = u.id WHERE u.email = 'ivan.petrov@mail.ru'),
+                     (SELECT id FROM opportunities WHERE title = 'Java Backend Developer (стажёр)'),
+                     'ACCEPTED', 'Здравствуйте! Я студент МГТУ, активно изучаю Java и Spring Boot. Буду рад пройти стажировку в Яндексе.', now(), now();
+
+              -- Мария → Яндекс Frontend React (PENDING)
+              INSERT INTO applications (id, applicant_id, opportunity_id, status, cover_letter, created_at, updated_at)
+              SELECT gen_random_uuid(),
+                     (SELECT ap.id FROM applicant_profiles ap JOIN users u ON ap.user_id = u.id WHERE u.email = 'maria.sidorova@mail.ru'),
+                     (SELECT id FROM opportunities WHERE title = 'Frontend React Developer'),
+                     'PENDING', 'Добрый день! Имею опыт разработки на React и TypeScript. Портфолио на GitHub.', now(), now();
+
+              -- Елена → Сбер DS стажёр (PENDING)
+              INSERT INTO applications (id, applicant_id, opportunity_id, status, cover_letter, created_at, updated_at)
+              SELECT gen_random_uuid(),
+                     (SELECT ap.id FROM applicant_profiles ap JOIN users u ON ap.user_id = u.id WHERE u.email = 'elena.volkova@mail.ru'),
+                     (SELECT id FROM opportunities WHERE title = 'Data Science стажёр'),
+                     'PENDING', 'Изучаю Data Science в ВШЭ. Прошла курсы по ML, знаю Python и SQL.', now(), now();
+
+              -- Дмитрий → VK DevOps (REJECTED)
+              INSERT INTO applications (id, applicant_id, opportunity_id, status, cover_letter, created_at, updated_at)
+              SELECT gen_random_uuid(),
+                     (SELECT ap.id FROM applicant_profiles ap JOIN users u ON ap.user_id = u.id WHERE u.email = 'dmitry.novikov@gmail.com'),
+                     (SELECT id FROM opportunities WHERE title = 'DevOps Engineer'),
+                     'REJECTED', 'Опыт с Docker и Kubernetes, настраивал CI/CD в учебных проектах.', now(), now();
+
+              -- Никита → VK Vue.js стажёр (RESERVE)
+              INSERT INTO applications (id, applicant_id, opportunity_id, status, cover_letter, created_at, updated_at)
+              SELECT gen_random_uuid(),
+                     (SELECT ap.id FROM applicant_profiles ap JOIN users u ON ap.user_id = u.id WHERE u.email = 'nikita.sokolov@gmail.com'),
+                     (SELECT id FROM opportunities WHERE title = 'Frontend Vue.js стажёр'),
+                     'RESERVED', 'Привет! Пишу на Vue 3 + TypeScript, делал SPA-проекты. Очень хочу в VK!', now(), now();
+
+  # --- 3 КОНТАКТА (contact_requests, status = ACCEPTED) ---
+  - changeSet:
+      id: seed-contacts
+      author: seed
+      context: seed
+      changes:
+        - sql:
+            sql: |
+              -- Иван ↔ Мария
+              INSERT INTO contact_requests (id, sender_id, receiver_id, status, created_at, updated_at)
+              SELECT gen_random_uuid(),
+                     (SELECT id FROM users WHERE email = 'ivan.petrov@mail.ru'),
+                     (SELECT id FROM users WHERE email = 'maria.sidorova@mail.ru'),
+                     'ACCEPTED', now(), now();
+
+              -- Алексей ↔ Елена
+              INSERT INTO contact_requests (id, sender_id, receiver_id, status, created_at, updated_at)
+              SELECT gen_random_uuid(),
+                     (SELECT id FROM users WHERE email = 'alex.kozlov@gmail.com'),
+                     (SELECT id FROM users WHERE email = 'elena.volkova@mail.ru'),
+                     'ACCEPTED', now(), now();
+
+              -- Дмитрий ↔ Сергей
+              INSERT INTO contact_requests (id, sender_id, receiver_id, status, created_at, updated_at)
+              SELECT gen_random_uuid(),
+                     (SELECT id FROM users WHERE email = 'dmitry.novikov@gmail.com'),
+                     (SELECT id FROM users WHERE email = 'sergey.ivanov@gmail.com'),
+                     'ACCEPTED', now(), now();
+
+  # --- 2 РЕКОМЕНДАЦИИ (recommendations) ---
+  - changeSet:
+      id: seed-recommendations
+      author: seed
+      context: seed
+      changes:
+        - sql:
+            sql: |
+              -- Иван рекомендует Марию на Frontend React Developer (Яндекс)
+              INSERT INTO recommendations (id, recommender_id, recommended_id, opportunity_id, message, created_at, updated_at)
+              SELECT gen_random_uuid(),
+                     (SELECT ap.id FROM applicant_profiles ap JOIN users u ON ap.user_id = u.id WHERE u.email = 'ivan.petrov@mail.ru'),
+                     (SELECT ap.id FROM applicant_profiles ap JOIN users u ON ap.user_id = u.id WHERE u.email = 'maria.sidorova@mail.ru'),
+                     (SELECT id FROM opportunities WHERE title = 'Frontend React Developer'),
+                     'Мария отличный frontend-разработчик, мы вместе делали проект на хакатоне.', now(), now();
+
+              -- Алексей рекомендует Елену на Data Science стажёр (Сбер)
+              INSERT INTO recommendations (id, recommender_id, recommended_id, opportunity_id, message, created_at, updated_at)
+              SELECT gen_random_uuid(),
+                     (SELECT ap.id FROM applicant_profiles ap JOIN users u ON ap.user_id = u.id WHERE u.email = 'alex.kozlov@gmail.com'),
+                     (SELECT ap.id FROM applicant_profiles ap JOIN users u ON ap.user_id = u.id WHERE u.email = 'elena.volkova@mail.ru'),
+                     (SELECT id FROM opportunities WHERE title = 'Data Science стажёр'),
+                     'Елена серьёзно занимается ML, рекомендую на стажировку в Сбер.', now(), now();

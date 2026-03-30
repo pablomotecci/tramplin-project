@@ -1,0 +1,8 @@
+target/
+.idea/
+*.iml
+.env.properties
+.env
+uploads/
+.git/
+*.log

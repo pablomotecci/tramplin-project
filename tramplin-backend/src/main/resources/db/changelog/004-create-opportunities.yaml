@@ -1,0 +1,139 @@
+databaseChangeLog:
+  - changeSet:
+      id: 004-create-opportunities-table
+      author: deadline_kids
+      comment: "Таблица вакансий / стажировок / мероприятий"
+      changes:
+        - createTable:
+            tableName: opportunities
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: employer_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: title
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: description
+                  type: TEXT
+
+              - column:
+                  name: type
+                  type: VARCHAR(30)
+
+              - column:
+                  name: work_format
+                  type: VARCHAR(30)
+
+              - column:
+                  name: status
+                  type: VARCHAR(30)
+
+              - column:
+                  name: city
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: address
+                  type: VARCHAR(500)
+
+              - column:
+                  name: location
+                  type: geometry(Point, 4326)
+
+              - column:
+                  name: salary_min
+                  type: BIGINT
+
+              - column:
+                  name: salary_max
+                  type: BIGINT
+
+              - column:
+                  name: published_at
+                  type: timestamp
+
+              - column:
+                  name: expires_at
+                  type: timestamp
+
+              - column:
+                  name: event_date
+                  type: timestamp
+
+              - column:
+                  name: contact_email
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: contact_phone
+                  type: VARCHAR(20)
+
+              - column:
+                  name: contact_url
+                  type: VARCHAR(255)
+
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: opportunities
+            baseColumnNames: employer_id
+            referencedTableName: companies
+            referencedColumnNames: id
+            constraintName: fk_opportunities_employer
+
+        - createIndex:
+            indexName: idx_opportunities_employer_id
+            tableName: opportunities
+            columns:
+              - column:
+                  name: employer_id
+
+        - createIndex:
+            indexName: idx_opportunities_status
+            tableName: opportunities
+            columns:
+              - column:
+                  name: status
+
+        - createIndex:
+            indexName: idx_opportunities_location
+            tableName: opportunities
+            columns:
+              - column:
+                  name: location
+            indexType: GIST
+
+      rollback:
+        - dropTable:
+            tableName: opportunities

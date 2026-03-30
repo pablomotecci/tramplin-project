@@ -1,0 +1,35 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-portfolio-fields
+      author: deadline_kids
+      comment: "Поля портфолио: ссылки на GitHub, портфолио, описание навыков"
+      changes:
+        - addColumn:
+            tableName: applicant_profiles
+            columns:
+              - column:
+                  name: portfolio_url
+                  type: VARCHAR(500)
+              - column:
+                  name: github_url
+                  type: VARCHAR(500)
+              - column:
+                  name: skills_summary
+                  type: TEXT
+  - changeSet:
+      id: seed-portfolio-urls
+      author: deadline_kids
+      comment: "Seed: добавить ссылки к тестовым соискателям"
+      changes:
+        - sql:
+            sql: |
+              UPDATE applicant_profiles SET github_url = 'https://github.com/ivan-petrov', portfolio_url = 'https://ivan-petrov.dev'
+              WHERE user_id = (SELECT id FROM users WHERE email = 'ivan.petrov@mail.ru');
+              UPDATE applicant_profiles SET github_url = 'https://github.com/maria-sid', portfolio_url = 'https://maria-frontend.dev'
+              WHERE user_id = (SELECT id FROM users WHERE email = 'maria.sidorova@mail.ru');
+              UPDATE applicant_profiles SET github_url = 'https://github.com/alex-kozlov'
+              WHERE user_id = (SELECT id FROM users WHERE email = 'alex.kozlov@gmail.com');
+              UPDATE applicant_profiles SET github_url = 'https://github.com/dmitry-nov'
+              WHERE user_id = (SELECT id FROM users WHERE email = 'dmitry.novikov@gmail.com');
+              UPDATE applicant_profiles SET github_url = 'https://github.com/nikita-sok'
+              WHERE user_id = (SELECT id FROM users WHERE email = 'nikita.sokolov@gmail.com');

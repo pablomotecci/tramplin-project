@@ -1,0 +1,97 @@
+databaseChangeLog:
+  - changeSet:
+      id: 009-create-verification-requests-table
+      author: deadline_kids
+      comment: "Таблица заявок на верификацию компаний"
+      changes:
+        - createTable:
+            tableName: verification_requests
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: employer_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: inn
+                  type: VARCHAR(12)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: company_domain
+                  type: VARCHAR(255)
+
+              - column:
+                  name: corporate_email
+                  type: VARCHAR(255)
+
+              - column:
+                  name: status
+                  type: VARCHAR(30)
+                  defaultValue: 'PENDING'
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: rejection_reason
+                  type: TEXT
+
+              - column:
+                  name: reviewed_by
+                  type: uuid
+
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: verification_requests
+            baseColumnNames: employer_id
+            referencedTableName: companies
+            referencedColumnNames: id
+            constraintName: fk_verification_requests_employer
+
+        - addForeignKeyConstraint:
+            baseTableName: verification_requests
+            baseColumnNames: reviewed_by
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_verification_requests_reviewer
+
+        - createIndex:
+            indexName: idx_verification_requests_status
+            tableName: verification_requests
+            columns:
+              - column:
+                  name: status
+
+        - createIndex:
+            indexName: idx_verification_requests_employer_id
+            tableName: verification_requests
+            columns:
+              - column:
+                  name: employer_id
+
+      rollback:
+        - dropTable:
+            tableName: verification_requests

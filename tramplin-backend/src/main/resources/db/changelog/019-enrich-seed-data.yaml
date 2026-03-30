@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: enrich-company-seed
+      author: deadline_kids
+      comment: "Добавить сайты, описания и даты к seed-данным"
+      changes:
+        - sql:
+            sql: |
+              -- Сайты компаний
+              UPDATE companies SET website_url = 'https://yandex.ru', description = 'Крупнейшая российская IT-компания. Разрабатывает поисковую систему, навигатор, маркетплейс и облачную платформу.' WHERE company_name = 'Яндекс';
+              UPDATE companies SET website_url = 'https://vk.com', description = 'Ведущая социальная платформа России. Развивает экосистему коммуникационных и развлекательных сервисов.' WHERE company_name = 'VK';
+              UPDATE companies SET website_url = 'https://sber.ru', description = 'Крупнейший банк России с сильным технологическим подразделением. AI, облачные платформы, финтех.' WHERE company_name = 'Сбер';
+              UPDATE companies SET website_url = 'https://tinkoff.ru', description = 'Цифровой банк-экосистема. Разработка высоконагруженных финансовых сервисов.' WHERE company_name = 'Тинькофф';
+              UPDATE companies SET website_url = 'https://kaspersky.ru', description = 'Мировой лидер в кибербезопасности. Разработка антивирусных решений и систем защиты.' WHERE company_name = 'Лаборатория Касперского';
+
+              -- Даты истечения вакансий и мероприятий
+              UPDATE opportunities SET expires_at = now() + interval '30 days' WHERE type IN ('VACANCY', 'INTERNSHIP', 'MENTORSHIP') AND expires_at IS NULL;
+              UPDATE opportunities SET event_date = now() + interval '14 days' WHERE type = 'EVENT' AND event_date IS NULL;

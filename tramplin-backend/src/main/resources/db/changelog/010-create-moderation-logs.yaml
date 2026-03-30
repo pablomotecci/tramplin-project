@@ -1,0 +1,89 @@
+databaseChangeLog:
+  - changeSet:
+      id: 010-create-moderation-logs-table
+      author: deadline_kids
+      comment: "Таблица журнала модерации"
+      changes:
+        - createTable:
+            tableName: moderation_logs
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: curator_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: action
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: target_type
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: target_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: reason
+                  type: TEXT
+
+              - column:
+                  name: details
+                  type: TEXT
+
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: moderation_logs
+            baseColumnNames: curator_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_moderation_logs_curator
+
+        - createIndex:
+            indexName: idx_moderation_logs_curator_id
+            tableName: moderation_logs
+            columns:
+              - column:
+                  name: curator_id
+
+        - createIndex:
+            indexName: idx_moderation_logs_target
+            tableName: moderation_logs
+            columns:
+              - column:
+                  name: target_type
+              - column:
+                  name: target_id
+
+      rollback:
+        - dropTable:
+            tableName: moderation_logs

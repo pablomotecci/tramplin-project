@@ -1,0 +1,62 @@
+databaseChangeLog:
+  # ============================================================
+  # Мастер-файл миграций.
+  # Порядок файлов = порядок применения миграций.
+  # ============================================================
+  - include:
+      file: db/changelog/001-create-users.yaml
+
+  - include:
+      file: db/changelog/002-create-companies.yaml
+
+  - include:
+      file: db/changelog/003-create-applicant-profiles.yaml
+
+  - include:
+      file: db/changelog/004-create-opportunities.yaml
+
+  - include:
+      file: db/changelog/005-create-tags.yaml
+
+  - include:
+      file: db/changelog/006-create-applications.yaml
+
+  - include:
+      file: db/changelog/007-create-favorites.yaml
+
+  - include:
+      file: db/changelog/008-create-contact-requests.yaml
+
+  - include:
+      file: db/changelog/009-create-verification-requests.yaml
+
+  - include:
+      file: db/changelog/010-create-moderation-logs.yaml
+
+  - include:
+      file: db/changelog/011-create-privacy-settings.yaml
+
+  - include:
+      file: db/changelog/012-create-recommendations.yaml
+
+  - include:
+      file: db/changelog/013-create-applicant-tags.yaml
+
+  - include:
+      file: db/changelog/014-add-media-fields.yaml
+
+  - include:
+      file: db/changelog/015-seed-data.yaml
+
+  - include:
+      file: db/changelog/016-fix-verification-status.yaml
+
+  - include:
+      file: db/changelog/017-set-tag-hierarchy.yaml
+
+  - include:
+      file: db/changelog/018-add-portfolio-fields.yaml
+
+  - include:
+      file: db/changelog/019-enrich-seed-data.yaml
+

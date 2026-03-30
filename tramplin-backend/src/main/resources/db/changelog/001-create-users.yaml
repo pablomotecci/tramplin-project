@@ -1,0 +1,121 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 001-enable-postgis
+      author: deadline_kids
+      comment: "Включаем расширение PostGIS для геопространственных запросов"
+      changes:
+        - sql:
+            sql: CREATE EXTENSION IF NOT EXISTS postgis;
+
+  - changeSet:
+      id: 001-enable-uuid
+      author: deadline_kids
+      comment: "Включаем расширение для генерации UUID"
+      changes:
+        - sql:
+            sql: CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+  - changeSet:
+      id: 001-create-users
+      author: deadline_kids
+      comment: "Таблица пользователей — центральная для аутентификации и RBAC"
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: email
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: display_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: password_hash
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: varchar(30)
+                  defaultValue: "ACTIVE"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 001-users-indexes
+      author: deadline_kids
+      comment: "Индексы для быстрого поиска по email и роли"
+      changes:
+        - createIndex:
+            indexName: idx_users_email
+            tableName: users
+            unique: true
+            columns:
+              - column:
+                  name: email
+        - createIndex:
+            indexName: idx_users_role
+            tableName: users
+            columns:
+              - column:
+                  name: role
+
+  - changeSet:
+      id: 001-seed-admin
+      author: deadline_kids
+      comment: >
+        Администратор по умолчанию (пароль: Admin123!).
+        BCrypt-хеш сгенерирован заранее. В production пароль меняется сразу после деплоя.
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+              - column:
+                  name: email
+                  value: "admin@tramplin.ru"
+              - column:
+                  name: display_name
+                  value: "Администратор"
+              - column:
+                  name: password_hash
+                  # BCrypt hash для "Admin123!"
+                  value: "$2b$10$7Jl/TKD/SqcZVqIVYZxpR.nxlAi.Mt2ua8hPwSOwQwrB8eawa8cVy"
+              - column:
+                  name: role
+                  value: "ADMIN"
+              - column:
+                  name: status
+                  value: "ACTIVE"

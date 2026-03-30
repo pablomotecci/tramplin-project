@@ -1,0 +1,72 @@
+databaseChangeLog:
+  - changeSet:
+      id: 007-create-favorites-table
+      author: deadline_kids
+      comment: "Таблица избранных вакансий пользователей"
+      changes:
+        - createTable:
+            tableName: favorites
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: opportunity_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: favorites
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_favorites_user
+
+        - addForeignKeyConstraint:
+            baseTableName: favorites
+            baseColumnNames: opportunity_id
+            referencedTableName: opportunities
+            referencedColumnNames: id
+            constraintName: fk_favorites_opportunity
+
+        - addUniqueConstraint:
+            tableName: favorites
+            columnNames: user_id, opportunity_id
+            constraintName: uq_favorites_user_opportunity
+
+        - createIndex:
+            indexName: idx_favorites_user_id
+            tableName: favorites
+            columns:
+              - column:
+                  name: user_id
+
+      rollback:
+        - dropTable:
+            tableName: favorites
