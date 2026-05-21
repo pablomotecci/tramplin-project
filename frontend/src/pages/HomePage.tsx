@@ -212,7 +212,7 @@ export function HomePage() {
     );
     observer.observe(statsRef.current);
     return () => observer.disconnect();
-  }, []);
+  }, [stats]);
 
 
 
