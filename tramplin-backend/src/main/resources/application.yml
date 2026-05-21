@@ -5,8 +5,9 @@
 
 server:
   port: 8080
-  servlet:
-    context-path: /api/v1
+  # context-path убран намеренно: префикс /api/v1 навешивается на все
+  # @RestController через PathMatchConfigurer (см. WebConfig), а статика
+  # /uploads/** раздаётся напрямую без версионного префикса.
 
 spring:
   config:
