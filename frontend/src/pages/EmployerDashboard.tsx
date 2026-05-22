@@ -4,7 +4,7 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { getCompanyProfile, updateCompanyProfile } from '../api/employer';
+import { getCompanyProfile, updateCompanyProfile, uploadCompanyLogo } from '../api/employer';
 import { getMyOpportunities, deleteOpportunity, changeOpportunityStatus } from '../api/opportunities';
 import { getErrorMessage } from '../api/client';
 import { Button } from '../components/ui/Button';
@@ -90,7 +90,7 @@ function getVerificationBanner(status: string): { icon: string; title: string; t
 }
 
 export function EmployerDashboard() {
-  const { user } = useAuth();
+  const { user, bumpAvatar } = useAuth();
   const navigate = useNavigate();
 
   const [profile, setProfile] = useState<CompanyProfileResponse | null>(null);
@@ -536,9 +536,12 @@ export function EmployerDashboard() {
               <FileUpload
                 label="Логотип компании"
                 currentUrl={profile?.logoUrl}
-                onUploaded={(url) => {
-                  setProfile(prev => prev ? { ...prev, logoUrl: url } : prev);
+                uploadFn={async (file) => {
+                  const updated = await uploadCompanyLogo(file);  // загрузка и сохранение одним запросом как и в случае с соискателем
+                  setProfile(updated);  // показать новый логотип сразу
+                  return updated.logoUrl || '';
                 }}
+                onUploaded={() => bumpAvatar()} // обновить логотип в хэдере
               />
               <div className={styles.formRow}>
                 <Input
@@ -631,7 +634,12 @@ export function EmployerDashboard() {
             <div className={styles.profileView}>
               <div className={styles.profileSummary}>
                 <div className={`${styles.avatar} ${styles.avatarCompany}`}>
-                  {(profile?.companyName || user?.displayName || '?').charAt(0).toUpperCase()}
+                  {profile?.logoUrl
+                    ? <img src={profile.logoUrl} alt="" style={{
+                        width: '100%', height: '100%', borderRadius: 'inherit', objectFit: 'cover',
+                      }} />
+                    : (profile?.companyName || user?.displayName || '?').charAt(0).toUpperCase()
+                  }
                 </div>
                 <div className={styles.profileInfo}>
                   <p className={styles.profileName}>

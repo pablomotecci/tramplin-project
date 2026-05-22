@@ -29,3 +29,16 @@ export async function updateCompanyProfile(
   );
   return response.data.data!;
 }
+
+
+// загрузка логотипа компании: грузит файл, бэк сохраняет и возвращает обновлённый профиль
+export async function uploadCompanyLogo(file: File): Promise<CompanyProfileResponse> {
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await api.put<ApiResponse<CompanyProfileResponse>>(
+    '/profile/employer/logo',
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } }
+  );
+  return response.data.data!;
+}
