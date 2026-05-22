@@ -27,6 +27,20 @@ export async function updateApplicantProfile(
 }
 
 
+// загрузка аватара: грузит файл, бэк сохраняет в БД и удаляет старый,
+// возвращает обновлённый профиль со свежим avatarUrl
+export async function uploadApplicantAvatar(file: File): Promise<ApplicantProfileResponse> {
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await api.put<ApiResponse<ApplicantProfileResponse>>(
+    '/profile/applicant/avatar',
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } }
+  );
+  return response.data.data!;
+}
+
+
 // Получить теги(навыки) соискателя
 export async function getApplicantTags(): Promise<string[]> {
   const response = await api.get<ApiResponse<string[]>>('/profile/applicant/tags');

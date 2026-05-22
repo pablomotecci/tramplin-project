@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth, } from '../../hooks/useAuth';
 import { AuthModal } from '../auth/AuthModal';
 import { Button } from '../ui/Button';
 import styles from './Header.module.css';
@@ -49,7 +49,7 @@ const roleLabels: Record<string, string> = {
 };
 
 export function Header() {
-  const { user, logout } = useAuth();
+  const { user, logout, avatarVersion } = useAuth();
   const navigate = useNavigate();
 
   const [authModal, setAuthModal] = useState<{
@@ -73,7 +73,7 @@ export function Header() {
         .then(p => setAvatarUrl(p.logoUrl || null))
         .catch(() => {});
     }
-  }, [user]);
+  }, [user, avatarVersion]);
 
   const openLogin = () => setAuthModal({ isOpen: true, mode: 'login' });
   const openRegister = () => setAuthModal({ isOpen: true, mode: 'register' });

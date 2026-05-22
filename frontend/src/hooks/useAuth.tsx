@@ -15,6 +15,8 @@ interface AuthContextType {
   register: (data: RegisterRequest) => Promise<void>;
   logout: () => void;
   clearError: () => void;
+  avatarVersion: number;
+  bumpAvatar: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -47,6 +49,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   const navigate = useNavigate();
+  const [avatarVersion, setAvatarVersion] = useState(0);
+  const bumpAvatar = useCallback(() => setAvatarVersion(v => v + 1), []);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -110,7 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, error, login, register, logout, clearError }}
+      value={{ user, isLoading, error, login, register, logout, clearError, avatarVersion, bumpAvatar }}
     >
       {children}
     </AuthContext.Provider>

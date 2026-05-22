@@ -6,9 +6,10 @@ interface FileUploadProps {
   accept?: string;
   currentUrl?: string | null;
   onUploaded: (url: string) => void;
+  uploadFn?: (file: File) => Promise<string>;
 }
 
-export function FileUpload({ label, accept = 'image/*', currentUrl, onUploaded }: FileUploadProps) {
+export function FileUpload({ label, accept = 'image/*', currentUrl, onUploaded, uploadFn }: FileUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -25,8 +26,8 @@ export function FileUpload({ label, accept = 'image/*', currentUrl, onUploaded }
     setError(null);
     setUploading(true);
     try {
-      const result = await uploadFile(file);
-      onUploaded(result.url);
+      const url = uploadFn ? await uploadFn(file) : (await uploadFile(file)).url;
+      onUploaded(url);
     } catch {
       setError('Ошибка загрузки файла');
     } finally {

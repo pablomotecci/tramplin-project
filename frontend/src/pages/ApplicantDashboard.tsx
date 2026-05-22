@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, type FormEvent } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { getApplicantProfile, updateApplicantProfile } from '../api/applicant';
+import { getApplicantProfile, updateApplicantProfile, uploadApplicantAvatar } from '../api/applicant';
 import { getErrorMessage, changePassword } from '../api/client';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -28,7 +28,7 @@ import type { Tag } from '../types';
 
 
 export function ApplicantDashboard() {
-  const { user } = useAuth();
+  const { user, bumpAvatar } = useAuth();
 
   // Состояния
   const [profile, setProfile] = useState<ApplicantProfileResponse | null>(null);
@@ -427,9 +427,12 @@ export function ApplicantDashboard() {
               <FileUpload
                 label="Аватар"
                 currentUrl={profile?.avatarUrl}
-                onUploaded={(url) => {
-                  setProfile(prev => prev ? { ...prev, avatarUrl: url } : prev);
+                uploadFn={async (file) => {
+                  const updated = await uploadApplicantAvatar(file);  // загрузка и созранение одним запросом
+                  setProfile(updated);  // показать новый аватар в профиле сразу
+                  return updated.avatarUrl || '';
                 }}
+                onUploaded={() => bumpAvatar}       // обновить аватар в хэдере
               />
               <div className={styles.formRow}>
                 <Input
