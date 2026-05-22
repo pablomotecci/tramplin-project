@@ -49,6 +49,38 @@ public class FileUploadService {
         }
     }
 
+    /**
+     * Удаляет файл по его публичному URL вида /uploads/avatars/uuid.jpg.
+     * Не бросает исключение, если файл уже не существует — это не ошибка,
+     * а нормальная ситуация (например, файл удалили вручную или дважды
+     * обновили аватар подряд).
+     */
+    public void deleteByUrl(String url) {
+        if (url == null || url.isBlank() || !url.startsWith("/uploads/")) {
+            return;
+        }
+
+        if (url.contains("..") || url.contains("\\")) {
+            log.warn("Попытка удаления с подозрительным URL: {}", url);
+            return;
+        }
+        try {
+            String relativePath = url.substring("/uploads/".length());
+            Path file = Paths.get(uploadDir, relativePath).normalize();
+
+            Path uploadRoot = Paths.get(uploadDir).toAbsolutePath().normalize();
+            if (!file.toAbsolutePath().normalize().startsWith(uploadRoot)) {
+                log.warn("Попытка удаления вне директории загрузок: {}", file);
+                return;
+            }
+
+            Files.deleteIfExists(file);
+            log.debug("Файл удалён: {}", file);
+        } catch (IOException e) {
+            log.warn("Не удалось удалить файл по URL {}: {}", url, e.getMessage());
+        }
+    }
+
     private String getExtension(String filename) {
         if (filename == null || !filename.contains(".")) return "jpg";
         return filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();

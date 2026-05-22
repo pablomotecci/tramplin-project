@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import tramplin.dto.application.ApplicationResponse;
 import tramplin.dto.request.UpdateApplicantRequest;
 import tramplin.dto.response.ApplicantProfileResponse;
@@ -39,6 +40,7 @@ public class ApplicantProfileService {
     private final PrivacySettingsRepository privacySettingsRepository;
     private final PrivacyService privacyService;
     private final TagRepository tagRepository;
+    private final FileUploadService fileUploadService;
 
     @Transactional(readOnly = true)
     public ApplicantProfileResponse getProfile(UUID userId) {
@@ -183,6 +185,26 @@ public class ApplicantProfileService {
                 .parentId(tag.getParent() != null ? tag.getParent().getId() : null)
                 .parentName(tag.getParent() != null ? tag.getParent().getName() : null)
                 .build();
+    }
+
+    @Transactional
+    public ApplicantProfileResponse updateAvatar(UUID userId, MultipartFile file) {
+        ApplicantProfile profile = applicantProfileRepository.findByUserIdWithTags(userId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Профиль соискателя не найден для userId: " + userId));
+
+        String oldUrl = profile.getAvatarUrl();
+        String newUrl = fileUploadService.upload(file, "avatars");
+        profile.setAvatarUrl(newUrl);
+
+        ApplicantProfile saved = applicantProfileRepository.save(profile);
+
+        if (oldUrl != null && !oldUrl.isBlank()) {
+            fileUploadService.deleteByUrl(oldUrl);
+        }
+
+        log.info("Аватар обновлён для userId={}: {}", userId, newUrl);
+        return toResponse(saved);
     }
 
     private ApplicantProfileResponse toResponse(ApplicantProfile profile) {

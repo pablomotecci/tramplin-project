@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import tramplin.dto.request.UpdateCompanyRequest;
 import tramplin.dto.response.CompanyProfileResponse;
 import tramplin.entity.Company;
@@ -19,6 +20,7 @@ import java.util.UUID;
 public class CompanyService {
 
     private final CompanyRepository companyRepository;
+    private final FileUploadService fileUploadService;
 
     @Transactional(readOnly = true)
     public CompanyProfileResponse getProfile(UUID userId) {
@@ -76,6 +78,26 @@ public class CompanyService {
                 .videoUrl(company.getVideoUrl())
                 .verificationStatus(company.getVerificationStatus().name())
                 .build();
+    }
+
+    @Transactional
+    public CompanyProfileResponse updateLogo(UUID userId, MultipartFile file) {
+        Company company = companyRepository.findByUserId(userId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Профиль компании не найден для userId: " + userId));
+
+        String oldUrl = company.getLogoUrl();
+        String newUrl = fileUploadService.upload(file, "logos");
+        company.setLogoUrl(newUrl);
+
+        Company saved = companyRepository.save(company);
+
+        if (oldUrl != null && !oldUrl.isBlank()) {
+            fileUploadService.deleteByUrl(oldUrl);
+        }
+
+        log.info("Логотип обновлён для userId={}: {}", userId, newUrl);
+        return toResponse(saved);
     }
 
     private CompanyProfileResponse toResponse(Company company) {

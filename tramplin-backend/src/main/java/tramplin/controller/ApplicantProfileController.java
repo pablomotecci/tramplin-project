@@ -4,10 +4,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import tramplin.dto.application.ApplicationResponse;
 import tramplin.dto.request.UpdateApplicantRequest;
 import tramplin.dto.request.UpdateApplicantTagsRequest;
@@ -47,6 +49,21 @@ public class ApplicantProfileController {
             @Valid @RequestBody UpdateApplicantRequest request
     ) {
         ApplicantProfileResponse response = applicantProfileService.updateProfile(principal.getUserId(), request);
+        return ResponseEntity.ok(ApiResponse.ok(response));
+    }
+
+    @PutMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('APPLICANT')")
+    @Operation(summary = "Загрузить/обновить аватар",
+            description = "Атомарно загружает изображение и привязывает его к профилю. "
+                    + "Старый аватар автоматически удаляется. "
+                    + "Форматы: JPEG, PNG, GIF, WebP. Макс. 10 МБ.")
+    public ResponseEntity<ApiResponse<ApplicantProfileResponse>> updateAvatar(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestParam("file") MultipartFile file
+    ) {
+        ApplicantProfileResponse response = applicantProfileService.updateAvatar(
+                principal.getUserId(), file);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
