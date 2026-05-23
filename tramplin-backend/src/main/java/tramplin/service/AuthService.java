@@ -113,6 +113,12 @@ public class AuthService {
             throw new BadCredentialsException("Невалидный или истёкший refresh-токен");
         }
 
+        String tokenType = jwtProvider.getTokenType(refreshToken);
+        if (!"refresh".equals(tokenType)) {
+            log.warn("Попытка использовать токен типа '{}' вместо refresh", tokenType);
+            throw new BadCredentialsException("Передан токен неверного типа");
+        }
+
         var userId = jwtProvider.getUserIdFromToken(refreshToken);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BadCredentialsException("Пользователь не найден"));
