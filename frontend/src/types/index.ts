@@ -442,3 +442,55 @@ export interface ModerationLogResponse {
   details: string | null;
   createdAt: string;
 }
+
+
+export type Degree = 'BACHELOR' | 'MASTER' | 'SPECIALIST' | 'PHD' | 'COLLEGE' | 'OTHER';
+
+export interface ResumeExperience {
+  id: string;
+  organization: string;
+  position: string;
+  startDate: string;
+  endDate: string | null;
+  description: string | null;
+  displayOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ResumeProject {
+  id: string;
+  title: string;
+  role: string | null;
+  startDate: string;
+  endDate: string | null;
+  description: string | null;
+  projectUrl: string | null;
+  repositoryUrl: string | null;
+  displayOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ResumeEducation {
+  id: string;
+  institution: string;
+  faculty: string | null;
+  degree: Degree;
+  startYear: number;
+  endYear: number | null;
+  description: string | null;
+  displayOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ResumeBundle {
+  experiences: ResumeExperience[];
+  projects: ResumeProject[];
+  education: ResumeEducation[];
+}
+
+export type ResumeExperienceInput = Omit<ResumeExperience, 'id' | 'displayOrder' | 'createdAt' | 'updatedAt'>;
+export type ResumeProjectInput   = Omit<ResumeProject,   'id' | 'displayOrder' | 'createdAt' | 'updatedAt'>;
+export type ResumeEducationInput = Omit<ResumeEducation, 'id' | 'displayOrder' | 'createdAt' | 'updatedAt'>;
