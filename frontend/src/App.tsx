@@ -14,6 +14,7 @@ import ApplicantProfile from './pages/ApplicantProfile';
 import NotFoundPage from './pages/NotFoundPage';
 import { Footer } from './components/layout/Footer';
 import { ToastProvider } from './components/ui/Toast';
+import { ResumePage } from './pages/ResumePage';
 
 /*
 Корневой компонент приложения
@@ -41,6 +42,15 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['APPLICANT']}>
                 <ApplicantDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/profile/resume"
+            element={
+              <ProtectedRoute allowedRoles={['APPLICANT']}>
+                <ResumePage />
               </ProtectedRoute>
             }
           />

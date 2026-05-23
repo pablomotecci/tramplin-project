@@ -415,9 +415,14 @@ export function ApplicantDashboard() {
           <div className={styles.cardHeader}>
             <h2 className={styles.cardTitle}>Мой профиль</h2>
             {!isEditing && (
-              <Button variant="secondary" size="sm" onClick={() => setIsEditing(true)}>
-                Редактировать
-              </Button>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <Button variant="secondary" size="sm" onClick={() => navigate('/profile/resume')}>
+                  Моё резюме
+                </Button>
+                <Button variant="secondary" size="sm" onClick={() => setIsEditing(true)}>
+                  Редактировать
+                </Button>
+              </div>
             )}
           </div>
 
