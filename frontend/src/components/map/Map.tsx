@@ -4,6 +4,7 @@ import { getOpportunitiesForMap } from '../../api/opportunities';
 import type { OpportunityMapCard } from '../../types';
 import styles from './Map.module.css';
 import { useFavorites } from '../../hooks/useFavorites';
+import { escapeHtml, safeUrl } from '../../utils/html';
 
 /*
   Компонент Яндекс карты с маркерами вакансий
@@ -49,35 +50,37 @@ function buildBalloonContent(opp: OpportunityMapCard): string {
   const typeBg = opp.type === 'VACANCY' ? '#dbeafe' : opp.type === 'INTERNSHIP' ? '#fff3ed' : opp.type === 'EVENT' ? '#d1fae5' : '#ede9fe';
   const typeColor = opp.type === 'VACANCY' ? '#1d4ed8' : opp.type === 'INTERNSHIP' ? '#E8622C' : opp.type === 'EVENT' ? '#059669' : '#7c3aed';
 
+  const logoUrl = safeUrl(opp.logoUrl);
+
   return `
     <div class="tramplin-balloon">
       <!-- Шапка: тип + формат -->
       <div class="tramplin-balloon__header">
         <span class="tramplin-balloon__type" style="background:${typeBg};color:${typeColor};">
-          ${TYPE_LABELS[opp.type] || opp.type}
+          ${escapeHtml(TYPE_LABELS[opp.type] || opp.type)}
         </span>
         <span class="tramplin-balloon__format">
-          <span class="material-symbols-rounded" style="font-size:14px;">${FORMAT_ICONS[opp.workFormat] || 'work'}</span>
-          ${FORMAT_LABELS[opp.workFormat] || opp.workFormat}
+          <span class="material-symbols-rounded" style="font-size:14px;">${escapeHtml(FORMAT_ICONS[opp.workFormat] || 'work')}</span>
+          ${escapeHtml(FORMAT_LABELS[opp.workFormat] || opp.workFormat)}
         </span>
       </div>
 
       <!-- Название -->
-      <div class="tramplin-balloon__title">${opp.title}</div>
+      <div class="tramplin-balloon__title">${escapeHtml(opp.title)}</div>
 
       <!-- Компания -->
       <div class="tramplin-balloon__company">
-        ${opp.logoUrl
-          ? `<img src="${opp.logoUrl}" alt="" class="tramplin-balloon__logo" />`
-          : `<div class="tramplin-balloon__logo-placeholder">${opp.companyName.charAt(0)}</div>`
+        ${logoUrl
+          ? `<img src="${logoUrl}" alt="" class="tramplin-balloon__logo" />`
+          : `<div class="tramplin-balloon__logo-placeholder">${escapeHtml(opp.companyName.charAt(0))}</div>`
         }
-        <span>${opp.companyName}</span>
+        <span>${escapeHtml(opp.companyName)}</span>
       </div>
 
       <!-- Теги -->
       ${opp.tags && opp.tags.length > 0 ? `
         <div class="tramplin-balloon__tags">
-          ${opp.tags.slice(0, 4).map(tag => `<span class="tramplin-balloon__tag">${tag}</span>`).join('')}
+          ${opp.tags.slice(0, 4).map(tag => `<span class="tramplin-balloon__tag">${escapeHtml(tag)}</span>`).join('')}
         </div>
       ` : ''}
 
@@ -85,13 +88,13 @@ function buildBalloonContent(opp: OpportunityMapCard): string {
       <div class="tramplin-balloon__footer">
         <span class="tramplin-balloon__city">
           <span class="material-symbols-rounded" style="font-size:14px;">location_on</span>
-          ${opp.city}
+          ${escapeHtml(opp.city)}
         </span>
         <span class="tramplin-balloon__salary">${formatSalary(opp.salaryMin, opp.salaryMax)}</span>
       </div>
 
       <!-- Кнопка -->
-      <a href="/opportunities/${opp.id}" class="tramplin-balloon__link">
+      <a href="/opportunities/${encodeURIComponent(opp.id)}" class="tramplin-balloon__link">
         Подробнее
         <span class="material-symbols-rounded" style="font-size:16px;">arrow_forward</span>
       </a>
