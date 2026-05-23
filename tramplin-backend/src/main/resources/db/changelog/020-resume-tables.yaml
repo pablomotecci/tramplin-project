@@ -1,0 +1,220 @@
+databaseChangeLog:
+  - changeSet:
+      id: 020-create-resume-experiences
+      author: deadline_kids
+      comment: "Опыт работы соискателя (раздел резюме)"
+      changes:
+        - createTable:
+            tableName: resume_experiences
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: applicant_profile_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_resume_experiences_applicant
+                    references: applicant_profiles(id)
+                    deleteCascade: true
+              - column:
+                  name: organization
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: position
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: start_date
+                  type: VARCHAR(7)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: end_date
+                  type: VARCHAR(7)
+              - column:
+                  name: description
+                  type: TEXT
+              - column:
+                  name: display_order
+                  type: INT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: idx_resume_experiences_applicant
+            tableName: resume_experiences
+            columns:
+              - column:
+                  name: applicant_profile_id
+              - column:
+                  name: display_order
+
+  - changeSet:
+      id: 020-create-resume-projects
+      author: pablomotecci
+      comment: "Проекты соискателя (раздел резюме)"
+      changes:
+        - createTable:
+            tableName: resume_projects
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: applicant_profile_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_resume_projects_applicant
+                    references: applicant_profiles(id)
+                    deleteCascade: true
+              - column:
+                  name: title
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role
+                  type: VARCHAR(255)
+              - column:
+                  name: start_date
+                  type: VARCHAR(7)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: end_date
+                  type: VARCHAR(7)
+              - column:
+                  name: description
+                  type: TEXT
+              - column:
+                  name: project_url
+                  type: VARCHAR(500)
+              - column:
+                  name: repository_url
+                  type: VARCHAR(500)
+              - column:
+                  name: display_order
+                  type: INT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: idx_resume_projects_applicant
+            tableName: resume_projects
+            columns:
+              - column:
+                  name: applicant_profile_id
+              - column:
+                  name: display_order
+
+  - changeSet:
+      id: 020-create-resume-education
+      author: pablomotecci
+      comment: "Образование соискателя (раздел резюме)"
+      changes:
+        - createTable:
+            tableName: resume_education
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: applicant_profile_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_resume_education_applicant
+                    references: applicant_profiles(id)
+                    deleteCascade: true
+              - column:
+                  name: institution
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: faculty
+                  type: VARCHAR(255)
+              - column:
+                  name: degree
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: start_year
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: end_year
+                  type: INT
+              - column:
+                  name: description
+                  type: TEXT
+              - column:
+                  name: display_order
+                  type: INT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: idx_resume_education_applicant
+            tableName: resume_education
+            columns:
+              - column:
+                  name: applicant_profile_id
+              - column:
+                  name: display_order
