@@ -16,12 +16,14 @@ import tramplin.dto.request.UpdateApplicantTagsRequest;
 import tramplin.dto.response.ApiResponse;
 import tramplin.dto.response.ApplicantProfileResponse;
 import tramplin.dto.response.ContactResponse;
+import tramplin.dto.resume.PublicResumeResponse;
 import tramplin.dto.tag.TagResponse;
 
 import java.util.List;
 import java.util.UUID;
 import tramplin.security.UserPrincipal;
 import tramplin.service.ApplicantProfileService;
+import tramplin.service.ResumePublicService;
 
 @RestController
 @RequestMapping("/profile/applicant")
@@ -30,6 +32,7 @@ import tramplin.service.ApplicantProfileService;
 public class ApplicantProfileController {
 
     private final ApplicantProfileService applicantProfileService;
+    private final ResumePublicService resumePublicService;
 
     @GetMapping
     @PreAuthorize("hasRole('APPLICANT')")
@@ -121,6 +124,18 @@ public class ApplicantProfileController {
             @AuthenticationPrincipal UserPrincipal principal
     ) {
         List<ContactResponse> response = applicantProfileService.getPublicContacts(
+                userId, principal.getUserId(), principal.getRole());
+        return ResponseEntity.ok(ApiResponse.ok(response));
+    }
+
+    @GetMapping("/{userId}/resume")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Публичное резюме", description = "Опыт, проекты и образование с учётом приватности")
+    public ResponseEntity<ApiResponse<PublicResumeResponse>> getPublicResume(
+            @PathVariable UUID userId,
+            @AuthenticationPrincipal UserPrincipal principal
+    ) {
+        PublicResumeResponse response = resumePublicService.getPublicResume(
                 userId, principal.getUserId(), principal.getRole());
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
