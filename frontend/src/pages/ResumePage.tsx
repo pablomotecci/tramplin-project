@@ -1,10 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { getExperiences, getProjects, getEducation,deleteExperience } from "../api/resume";
+import { getExperiences, getProjects, getEducation,deleteExperience, deleteProject, deleteEducation } from "../api/resume";
 import type { ResumeExperience, ResumeProject, ResumeEducation, Degree } from "../types";
 import { ExperienceModal } from "../components/resume/ExperienceModal";
+import { ProjectModal } from "../components/resume/ProjectModal";
+import { EducationModal } from "../components/resume/EducationModal";
 import { Button } from "../components/ui/Button";
 import { useToast } from "../components/ui/Toast";
+
 
 const DEGREE_LABELS: Record<Degree, string> = {
     BACHELOR: 'Бакалавриат', 'MASTER': 'Магистратура', SPECIALIST: 'Специалитет', PHD: 'Аспирантура', COLLEGE: 'Колледж', OTHER: 'Другое',
@@ -41,6 +44,21 @@ export function ResumePage() {
         } catch (e: any) {
             showToast(e?.response?.data?.error?.message || 'Не удалось удалить', 'error');
         }
+    }
+
+
+    const [projModal, setProjModal] = useState<{ open: boolean; record: ResumeProject | null }>({ open: false, record: null });
+    const [eduModal, setEduModal] = useState<{ open: boolean; record: ResumeEducation | null }>({ open: false, record: null });
+
+    async function handleDeleteProject(id: string) {
+        if (!window.confirm('Удалить этот проект?')) return;
+        try { await deleteProject(id); showToast('Проект удалён', 'success'); load(); }
+        catch (e: any) { showToast(e?.response?.data?.error?.message || 'Не удалось удалить', 'error'); }
+    }
+    async function handleDeleteEducation(id: string) {
+        if (!window.confirm('Удалить эту запись об образовании?')) return;
+        try { await deleteEducation(id); showToast('Запись удалена', 'success'); load(); }
+        catch (e: any) { showToast(e?.response?.data?.error?.message || 'Не удалось удалить', 'error'); }
     }
 
     const iconBtn = { background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', color: 'var(--color-text-secondary)' } as const;
@@ -119,42 +137,84 @@ export function ResumePage() {
 
             {/* Проекты */}
             <section style={card}>
-                <div style={title}>Проекты</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                    <div style={title}>Проекты</div>
+                    <Button variant="secondary" size="sm" onClick={() => setProjModal({ open: true, record: null })}>+ Добавить</Button>
+                </div>
                 {projects.length === 0
                     ? <div style={empty}>Пока нет проектов.</div>
                     : projects.map(p => (
                         <div key={p.id} style={item}>
-                            <div style={{ fontWeight: 600 }}>{p.title}{p.role ? ` · ${p.role}` : ''}</div>
-                            <div style={meta}>{fmtMonth(p.startDate)} — {fmtMonth(p.endDate)}</div>
-                            {p.description && <div style={{ marginTop: 4 }}>{p.description}</div>}
-                            <div style={{ marginTop: 4, display: 'flex', gap: '1rem' }}>
-                                {p.projectUrl && <a href={p.projectUrl} target="_blank" rel="noreferrer">Демо</a>}
-                                {p.repositoryUrl && <a href={p.repositoryUrl} target="_blank" rel="noreferrer">Репозиторий</a>}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
+                                <div>
+                                    <div style={{ fontWeight: 600 }}>{p.title}{p.role ? ` · ${p.role}` : ''}</div>
+                                    <div style={meta}>{fmtMonth(p.startDate)} — {fmtMonth(p.endDate)}</div>
+                                    {p.description && <div style={{ marginTop: 4 }}>{p.description}</div>}
+                                    <div style={{ marginTop: 4, display: 'flex', gap: '1rem' }}>
+                                        {p.projectUrl && <a href={p.projectUrl} target="_blank" rel="noreferrer">Демо</a>}
+                                        {p.repositoryUrl && <a href={p.repositoryUrl} target="_blank" rel="noreferrer">Репозиторий</a>}
+                                    </div>
+                                </div>
+                                <div style={{ display: 'flex', gap: '0.25rem', flexShrink: 0 }}>
+                                    <button title="Редактировать" style={iconBtn} onClick={() => setProjModal({ open: true, record: p })}>
+                                        <span className="material-symbols-rounded" style={{ fontSize: 18 }}>edit</span>
+                                    </button>
+                                    <button title="Удалить" style={iconBtn} onClick={() => handleDeleteProject(p.id)}>
+                                        <span className="material-symbols-rounded" style={{ fontSize: 18 }}>delete</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     ))}
-            </section>
+                </section>
 
             {/* Образование */}
             <section style={card}>
-                <div style={title}>Образование</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                    <div style={title}>Образование</div>
+                    <Button variant="secondary" size="sm" onClick={() => setEduModal({ open: true, record: null })}>+ Добавить</Button>
+                </div>
                 {education.length === 0
                     ? <div style={empty}>Пока нет записей об образовании.</div>
                     : education.map(ed => (
                         <div key={ed.id} style={item}>
-                            <div style={{ fontWeight: 600 }}>{ed.institution}</div>
-                            <div style={meta}>
-                                {DEGREE_LABELS[ed.degree]}{ed.faculty ? ` · ${ed.faculty}` : ''} · {ed.startYear} — {ed.endYear ?? 'наст. время'}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
+                                <div>
+                                    <div style={{ fontWeight: 600 }}>{ed.institution}</div>
+                                    <div style={meta}>{DEGREE_LABELS[ed.degree]}{ed.faculty ? ` · ${ed.faculty}` : ''} · {ed.startYear} — {ed.endYear ?? 'наст. время'}</div>
+                                    {ed.description && <div style={{ marginTop: 4 }}>{ed.description}</div>}
+                                </div>
+                                <div style={{ display: 'flex', gap: '0.25rem', flexShrink: 0 }}>
+                                    <button title="Редактировать" style={iconBtn} onClick={() => setEduModal({ open: true, record: ed })}>
+                                        <span className="material-symbols-rounded" style={{ fontSize: 18 }}>edit</span>
+                                    </button>
+                                    <button title="Удалить" style={iconBtn} onClick={() => handleDeleteEducation(ed.id)}>
+                                        <span className="material-symbols-rounded" style={{ fontSize: 18 }}>delete</span>
+                                    </button>
+                                </div>
                             </div>
-                            {ed.description && <div style={{ marginTop: 4 }}>{ed.description}</div>}
-                            </div>
-                    ))}
+                        </div>
+                ))}
             </section>
 
             <ExperienceModal
                 isOpen={expModal.open}
                 record={expModal.record}
                 onClose={() => setExpModal({ open: false, record: null })}
+                onSaved={load}
+            />
+
+            <ProjectModal
+                isOpen={projModal.open}
+                record={projModal.record}
+                onClose={() => setProjModal({ open: false, record: null })}
+                onSaved={load}
+            />
+
+            <EducationModal
+                isOpen={eduModal.open}
+                record={eduModal.record}
+                onClose={() => setEduModal({ open: false, record: null })}
                 onSaved={load}
             />
         </div>
