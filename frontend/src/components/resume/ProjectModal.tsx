@@ -68,8 +68,12 @@ export function ProjectModal({ isOpen, onClose, onSaved, record }: Props) {
         <Input label="Название" {...register('title')} error={errors.title?.message} />
         <Input label="Роль (необязательно)" {...register('role')} error={errors.role?.message} />
         <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <Input label="Начало" type="month" {...register('startDate')} error={errors.startDate?.message} />
-          <Input label="Окончание" type="month" {...register('endDate')} error={errors.endDate?.message} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+                <Input label="Начало" type="month" {...register('startDate')} error={errors.startDate?.message} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+                <Input label="Окончание" type="month" {...register('endDate')} error={errors.endDate?.message} />
+            </div>
         </div>
         <Input label="Ссылка на демо (необязательно)" placeholder="https://..." {...register('projectUrl')} error={errors.projectUrl?.message} />
         <Input label="Репозиторий (необязательно)" placeholder="https://github.com/..." {...register('repositoryUrl')} error={errors.repositoryUrl?.message} />

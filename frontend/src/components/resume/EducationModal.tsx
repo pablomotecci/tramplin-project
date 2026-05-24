@@ -79,8 +79,12 @@ export function EducationModal({ isOpen, onClose, onSaved, record }: Props) {
           </select>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <Input label="Год начала" type="number" placeholder="2022" {...register('startYear')} error={errors.startYear?.message} />
-          <Input label="Год окончания" type="number" placeholder="2026" {...register('endYear')} error={errors.endYear?.message} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+                <Input label="Год начала" type="number" placeholder="2022" {...register('startYear')} error={errors.startYear?.message} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+                <Input label="Год окончания" type="number" placeholder="2026" {...register('endYear')} error={errors.endYear?.message} />
+            </div>
         </div>
         <div>
           <label style={{ display: 'block', marginBottom: 4, fontSize: '0.85rem' }}>Описание</label>

@@ -79,8 +79,12 @@ export function ExperienceModal({ isOpen, onClose, onSaved, record }: Props) {
         <Input label="Организация" {...register('organization')} error={errors.organization?.message} />
         <Input label="Должность" {...register('position')} error={errors.position?.message} />
         <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <Input label="Начало" type="month" {...register('startDate')} error={errors.startDate?.message} />
-          <Input label="Окончание" type="month" {...register('endDate')} error={errors.endDate?.message} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+                <Input label="Начало" type="month" {...register('startDate')} error={errors.startDate?.message} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+                <Input label="Окончание" type="month" {...register('endDate')} error={errors.endDate?.message} />
+            </div>
         </div>
         <div>
           <label style={{ display: 'block', marginBottom: 4, fontSize: '0.85rem' }}>Описание</label>
