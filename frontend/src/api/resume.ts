@@ -25,8 +25,9 @@ export async function updateExperience(id: string, data: ResumeExperienceInput):
 export async function deleteExperience(id: string): Promise<void> {
   await api.delete(`${BASE}/experiences/${id}`);
 }
-export async function reorderExperiences(items: ReorderItem[]): Promise<void> {
-  await api.put(`${BASE}/experiences/reorder`, { items });
+export async function reorderExperiences(items: ReorderItem[]): Promise<ResumeExperience[]> {
+  const res = await api.put<ApiResponse<ResumeExperience[]>>(`${BASE}/experiences/reorder`, { items });
+  return res.data.data!;
 }
 
 // Проекты
@@ -45,8 +46,9 @@ export async function updateProject(id: string, data: ResumeProjectInput): Promi
 export async function deleteProject(id: string): Promise<void> {
   await api.delete(`${BASE}/projects/${id}`);
 }
-export async function reorderProjects(items: ReorderItem[]): Promise<void> {
-  await api.put(`${BASE}/projects/reorder`, { items });
+export async function reorderProjects(items: ReorderItem[]): Promise<ResumeProject[]> {
+  const res = await api.put<ApiResponse<ResumeProject[]>>(`${BASE}/projects/reorder`, { items });
+  return res.data.data!;
 }
 
 // Образование
@@ -65,8 +67,9 @@ export async function updateEducation(id: string, data: ResumeEducationInput): P
 export async function deleteEducation(id: string): Promise<void> {
   await api.delete(`${BASE}/education/${id}`);
 }
-export async function reorderEducation(items: ReorderItem[]): Promise<void> {
-  await api.put(`${BASE}/education/reorder`, { items });
+export async function reorderEducation(items: ReorderItem[]): Promise<ResumeEducation[]> {
+  const res = await api.put<ApiResponse<ResumeEducation[]>>(`${BASE}/education/reorder`, { items });
+  return res.data.data!;
 }
 
 // Публичное резюме

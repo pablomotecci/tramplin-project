@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { getExperiences, getProjects, getEducation,deleteExperience, deleteProject, deleteEducation } from "../api/resume";
+import { getExperiences, getProjects, getEducation,deleteExperience, deleteProject, deleteEducation, reorderExperiences, reorderProjects, reorderEducation, type ReorderItem } from "../api/resume";
 import type { ResumeExperience, ResumeProject, ResumeEducation, Degree } from "../types";
 import { ExperienceModal } from "../components/resume/ExperienceModal";
 import { ProjectModal } from "../components/resume/ProjectModal";
@@ -61,6 +61,28 @@ export function ResumePage() {
         catch (e: any) { showToast(e?.response?.data?.error?.message || 'Не удалось удалить', 'error'); }
     }
 
+    // Перемещает запись на одну позицию вверх (-1) или вниз (+1)
+    async function move<T extends { id: string }>(
+        list: T[],
+        setList: (v: T[]) => void,
+        reorderFn: (items: ReorderItem[]) => Promise<T[]>,
+        index: number,
+        direction: -1 | 1,
+    ) {
+        const target = index + direction;
+        if (target < 0 || target >= list.length) return;
+        const reordered = [...list];
+        [reordered[index], reordered[target]] = [reordered[target], reordered[index]];
+        setList(reordered); // оптимистично показываем новый порядок
+        try {
+            const updated = await reorderFn(reordered.map((it, idx) => ({ id: it.id, displayOrder: idx })));
+            setList(updated);
+        } catch (e: any) {
+            showToast(e?.response?.data?.error?.message || 'Не удалось изменить порядок', 'error');
+            load();
+        }
+    }
+
     const iconBtn = { background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', color: 'var(--color-text-secondary)' } as const;
 
     const load = useCallback(async () => {
@@ -114,7 +136,7 @@ export function ResumePage() {
                 </div>
                 {experiences.length === 0
                     ? <div style={empty}>Пока нет записей об опыте работы.</div>
-                    : experiences.map(e => (
+                    : experiences.map((e, index) => (
                         <div key={e.id} style={item}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
                                 <div>
@@ -123,6 +145,16 @@ export function ResumePage() {
                                     {e.description && <div style={{ marginTop: 4 }}>{e.description}</div>}
                                 </div>
                                 <div style={{ display: 'flex', gap: '0.25rem', flexShrink: 0 }}>
+                                    <button title="Вверх" disabled={index === 0}
+                                        style={{ ...iconBtn, opacity: index === 0 ? 0.3 : 1 }}
+                                        onClick={() => move(experiences, setExperiences, reorderExperiences, index, -1)}>
+                                        <span className="material-symbols-rounded" style={{ fontSize: 18 }}>arrow_upward</span>
+                                    </button>
+                                    <button title="Вниз" disabled={index === experiences.length - 1}
+                                        style={{ ...iconBtn, opacity: index === experiences.length - 1 ? 0.3 : 1 }}
+                                        onClick={() => move(experiences, setExperiences, reorderExperiences, index, 1)}>
+                                        <span className="material-symbols-rounded" style={{ fontSize: 18 }}>arrow_downward</span>
+                                    </button>
                                     <button title="Редактировать" style={iconBtn} onClick={() => setExpModal({ open: true, record: e })}>
                                         <span className="material-symbols-rounded" style={{ fontSize: 18 }}>edit</span>
                                     </button>
@@ -139,11 +171,11 @@ export function ResumePage() {
             <section style={card}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
                     <div style={title}>Проекты</div>
-                    <Button variant="secondary" size="sm" onClick={() => setProjModal({ open: true, record: null })}>+ Добавить</Button>
+                    <Button variant="secondary" size="sm" onClick={() => setProjModal({ open: true, record: null })}><span className="material-symbols-rounded">add</span> Добавить</Button>
                 </div>
                 {projects.length === 0
                     ? <div style={empty}>Пока нет проектов.</div>
-                    : projects.map(p => (
+                    : projects.map((p, index) => (
                         <div key={p.id} style={item}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
                                 <div>
@@ -156,6 +188,16 @@ export function ResumePage() {
                                     </div>
                                 </div>
                                 <div style={{ display: 'flex', gap: '0.25rem', flexShrink: 0 }}>
+                                    <button title="Вверх" disabled={index === 0}
+                                        style={{ ...iconBtn, opacity: index === 0 ? 0.3 : 1 }}
+                                        onClick={() => move(projects, setProjects, reorderProjects, index, -1)}>
+                                        <span className="material-symbols-rounded" style={{ fontSize: 18 }}>arrow_upward</span>
+                                    </button>
+                                    <button title="Вниз" disabled={index === projects.length - 1}
+                                        style={{ ...iconBtn, opacity: index === projects.length - 1 ? 0.3 : 1 }}
+                                        onClick={() => move(projects, setProjects, reorderProjects, index, 1)}>
+                                        <span className="material-symbols-rounded" style={{ fontSize: 18 }}>arrow_downward</span>
+                                    </button>
                                     <button title="Редактировать" style={iconBtn} onClick={() => setProjModal({ open: true, record: p })}>
                                         <span className="material-symbols-rounded" style={{ fontSize: 18 }}>edit</span>
                                     </button>
@@ -172,11 +214,11 @@ export function ResumePage() {
             <section style={card}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
                     <div style={title}>Образование</div>
-                    <Button variant="secondary" size="sm" onClick={() => setEduModal({ open: true, record: null })}>+ Добавить</Button>
+                    <Button variant="secondary" size="sm" onClick={() => setEduModal({ open: true, record: null })}><span className="material-symbols-rounded">add</span> Добавить</Button>
                 </div>
                 {education.length === 0
                     ? <div style={empty}>Пока нет записей об образовании.</div>
-                    : education.map(ed => (
+                    : education.map((ed, index) => (
                         <div key={ed.id} style={item}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
                                 <div>
@@ -185,6 +227,16 @@ export function ResumePage() {
                                     {ed.description && <div style={{ marginTop: 4 }}>{ed.description}</div>}
                                 </div>
                                 <div style={{ display: 'flex', gap: '0.25rem', flexShrink: 0 }}>
+                                    <button title="Вверх" disabled={index === 0}
+                                        style={{ ...iconBtn, opacity: index === 0 ? 0.3 : 1 }}
+                                        onClick={() => move(education, setEducation, reorderEducation, index, -1)}>
+                                        <span className="material-symbols-rounded" style={{ fontSize: 18 }}>arrow_upward</span>
+                                    </button>
+                                    <button title="Вниз" disabled={index === education.length - 1}
+                                        style={{ ...iconBtn, opacity: index === education.length - 1 ? 0.3 : 1 }}
+                                        onClick={() => move(education, setEducation, reorderEducation, index, 1)}>
+                                        <span className="material-symbols-rounded" style={{ fontSize: 18 }}>arrow_downward</span>
+                                    </button>
                                     <button title="Редактировать" style={iconBtn} onClick={() => setEduModal({ open: true, record: ed })}>
                                         <span className="material-symbols-rounded" style={{ fontSize: 18 }}>edit</span>
                                     </button>
