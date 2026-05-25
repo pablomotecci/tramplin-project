@@ -1,6 +1,7 @@
 package tramplin.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -11,7 +12,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface ApplicantProfileRepository extends JpaRepository<ApplicantProfile, UUID> {
+public interface ApplicantProfileRepository extends
+        JpaRepository<ApplicantProfile, UUID>,
+        JpaSpecificationExecutor<ApplicantProfile> {
 
     Optional<ApplicantProfile> findByUserId(UUID userId);
 
