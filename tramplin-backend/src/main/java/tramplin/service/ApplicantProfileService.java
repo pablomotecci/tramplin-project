@@ -112,11 +112,26 @@ public class ApplicantProfileService {
             throw new EntityNotFoundException("Профиль не найден или скрыт");
         }
         if (!privacyService.canView(privacy.getResumeVisibility(), viewerId, viewerRole, profileUserId)) {
-            response.setBio(null);
-            response.setPhone(null);
+            hideResumeDetails(response);
         }
 
         return response;
+    }
+
+    /**
+     * Обнуляет «детальную» часть резюме, оставляя «карточку» (имя, фамилия, отчество, аватар, ВУЗ).
+     * Применяется, когда profileVisibility разрешает просмотр, но resumeVisibility — нет.
+     * tags обнуляются пустым списком, а не null, чтобы фронт не падал на .map()/.length.
+     */
+    private void hideResumeDetails(ApplicantProfileResponse response) {
+        response.setCourse(null);
+        response.setGraduationYear(null);
+        response.setBio(null);
+        response.setPhone(null);
+        response.setPortfolioUrl(null);
+        response.setGithubUrl(null);
+        response.setSkillsSummary(null);
+        response.setTags(List.of());
     }
 
     @Transactional(readOnly = true)
