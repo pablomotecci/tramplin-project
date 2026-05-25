@@ -1,8 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getApplicantById } from '../api/applicant';
-import type { ApplicantProfileResponse } from '../types';
+import type { ApplicantProfileResponse, ResumeBundle, Degree } from '../types';
 import styles from './OpportunityPage.module.css';
+import { getPublicResume } from '../api/resume';
+
+
+const DEGREE_LABELS: Record<Degree, string> = {
+  BACHELOR: 'Бакалавриат', MASTER: 'Магистратура', SPECIALIST: 'Специалитет', PHD: 'Аспирантура', COLLEGE: 'Колледж', OTHER: 'Другое',
+};
+function fmtMonth(value: string | null): string {
+  if (!value) return 'наст.время';
+  const [y, m] = value.split('-');
+  const months = ['', 'янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+  return `${months[Number(m)] || m} ${y}`;
+}
 
 export default function ApplicantProfile() {
   const { id } = useParams<{ id: string }>();
@@ -10,6 +22,8 @@ export default function ApplicantProfile() {
   const [profile, setProfile] = useState<ApplicantProfileResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [resume, setResume] = useState<ResumeBundle | null>(null);
+  const [resumeHidden, setResumeHidden] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -25,6 +39,14 @@ export default function ApplicantProfile() {
     }
     load();
   }, [id]);
+
+
+  useEffect(() => {
+    if (!id) return;
+    getPublicResume(id)
+      .then(setResume)
+      .catch(() => setResumeHidden(true));
+  }, [id])
 
   if (loading) {
     return (
@@ -144,6 +166,71 @@ export default function ApplicantProfile() {
           </div>
         </div>
       )}
+
+      {/* Резюме (только просмотр) */}
+      <div style={{ padding: '1.25rem 0', borderTop: '1px solid var(--color-border, #e5e7eb)' }}>
+        <h2 className={styles.sectionTitle}>Резюме</h2>
+
+        {resumeHidden || !resume ? (
+          <p style={{ color: 'var(--color-text-secondary)' }}>
+            Резюме скрыто настройками приватности или ещё не заполнено.
+          </p>
+        ) : (resume.experiences.length === 0 && resume.projects.length === 0 && resume.education.length === 0) ? (
+          <p style={{ color: 'var(--color-text-secondary)' }}>Резюме пока не заполнено.</p>
+        ) : (
+          <>
+            {resume.experiences.length > 0 && (
+              <div style={{ marginBottom: '1rem' }}>
+                <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>Опыт работы</h3>
+                {resume.experiences.map(e => (
+                  <div key={e.id} style={{ marginBottom: '0.6rem' }}>
+                    <div style={{ fontWeight: 600 }}>{e.position}</div>
+                    <div style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem' }}>
+                      {e.organization} · {fmtMonth(e.startDate)} — {fmtMonth(e.endDate)}
+                    </div>
+                    {e.description && <div style={{ fontSize: '0.9rem', marginTop: 2 }}>{e.description}</div>}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {resume.projects.length > 0 && (
+              <div style={{ marginBottom: '1rem' }}>
+                <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>Проекты</h3>
+                {resume.projects.map(p => (
+                  <div key={p.id} style={{ marginBottom: '0.6rem' }}>
+                    <div style={{ fontWeight: 600 }}>{p.title}{p.role ? ` · ${p.role}` : ''}</div>
+                    <div style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem' }}>
+                      {fmtMonth(p.startDate)} — {fmtMonth(p.endDate)}
+                    </div>
+                    {p.description && <div style={{ fontSize: '0.9rem', marginTop: 2 }}>{p.description}</div>}
+                    <div style={{ marginTop: 4, display: 'flex', gap: '1rem' }}>
+                      {p.projectUrl && <a href={p.projectUrl} target="_blank" rel="noreferrer">Демо</a>}
+                      {p.repositoryUrl && <a href={p.repositoryUrl} target="_blank" rel="noreferrer">Репозиторий</a>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {resume.education.length > 0 && (
+              <div>
+                <h3 style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>Образование</h3>
+                {resume.education.map(ed => (
+                  <div key={ed.id} style={{ marginBottom: '0.6rem' }}>
+                    <div style={{ fontWeight: 600 }}>{ed.institution}</div>
+                    <div style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem' }}>
+                      {DEGREE_LABELS[ed.degree]}{ed.faculty ? ` · ${ed.faculty}` : ''} · {ed.startYear} — {ed.endYear ?? 'наст. время'}
+                    </div>
+                    {ed.description && <div style={{ fontSize: '0.9rem', marginTop: 2 }}>{ed.description}</div>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
     </div>
   );
 }
