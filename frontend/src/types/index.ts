@@ -494,3 +494,23 @@ export interface ResumeBundle {
 export type ResumeExperienceInput = Omit<ResumeExperience, 'id' | 'displayOrder' | 'createdAt' | 'updatedAt'>;
 export type ResumeProjectInput   = Omit<ResumeProject,   'id' | 'displayOrder' | 'createdAt' | 'updatedAt'>;
 export type ResumeEducationInput = Omit<ResumeEducation, 'id' | 'displayOrder' | 'createdAt' | 'updatedAt'>;
+
+
+// поиск соискателей
+export interface ApplicantSearchResult {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl: string | null;
+  university: string | null;
+  graduationYear: number | null;
+  topTags: string[];
+}
+
+export interface ApplicantSearchPage {
+  content: ApplicantSearchResult[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}

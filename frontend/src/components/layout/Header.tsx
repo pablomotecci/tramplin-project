@@ -90,6 +90,12 @@ export function Header() {
           </Link>
 
           <div className={styles.actions}>
+            {user && (user.role === 'APPLICANT' || user.role === 'EMPLOYER') && (
+            <Button variant="ghost" size="sm" onClick={() => navigate('/applicants')}>
+              Студенты
+            </Button>
+            )}
+            
             <button
               onClick={toggleTheme}
               title={theme === 'dark' ? 'Светлая тема' : 'Тёмная тема'}

@@ -15,6 +15,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import { Footer } from './components/layout/Footer';
 import { ToastProvider } from './components/ui/Toast';
 import { ResumePage } from './pages/ResumePage';
+import { ApplicantsSearchPage } from './pages/ApplicantsSearchPage';
 
 /*
 Корневой компонент приложения
@@ -92,10 +93,21 @@ function App() {
             }
           />
 
-          <Route path="/opportunities/:id" element={<OpportunityPage />} />
+          <Route 
+          path="/opportunities/:id" element={<OpportunityPage />} />
           <Route path="/company/:id" element={<CompanyProfile />} />
           <Route path="/applicant/:id" element={<ApplicantProfile />} />
-          <Route path="*" element={<NotFoundPage />} />
+          <Route path="*" element={<NotFoundPage />} 
+          />
+
+          <Route
+            path="/applicants"
+            element={
+              <ProtectedRoute allowedRoles={['APPLICANT', 'EMPLOYER']}>
+                <ApplicantsSearchPage />
+              </ProtectedRoute>
+            }
+          />
 
         </Routes>
         <Footer />

@@ -1,11 +1,7 @@
 // API функции для ЛК соискателя.
 
 import api from './client';
-import type {
-  ApiResponse,
-  ApplicantProfileResponse,
-  UpdateApplicantRequest,
-} from '../types';
+import type { ApiResponse, ApplicantProfileResponse, UpdateApplicantRequest, ApplicantSearchPage } from '../types';
 
 // Получить свой профиль соискателя
 export async function getApplicantProfile(): Promise<ApplicantProfileResponse> {
@@ -68,5 +64,25 @@ export async function getApplicantApplications(userId: string): Promise<any[]> {
 
 export async function getApplicantContacts(userId: string): Promise<any[]> {
   const response = await api.get<ApiResponse<any[]>>(`/profile/applicant/${userId}/contacts`);
+  return response.data.data!;
+}
+
+
+// параметры поиска соискателй
+export interface ApplicantSearchParams {
+  query?: string;
+  university?: string;
+  graduationYearMin?: number;
+  graduationYearMax?: number;
+  tagIds?: string[];
+  page?: number;
+  size?: number;
+  sort?: 'name' | 'university' | 'recent';
+}
+
+export async function searchApplicants(params: ApplicantSearchParams): Promise<ApplicantSearchPage> {
+  const response = await api.get<ApiResponse<ApplicantSearchPage>>('/applicants/search', {
+    params, paramsSerializer: { indexes: null },
+  });
   return response.data.data!;
 }
