@@ -4,6 +4,10 @@ import { getApplicantById } from '../api/applicant';
 import type { ApplicantProfileResponse, ResumeBundle, Degree } from '../types';
 import styles from './OpportunityPage.module.css';
 import { getPublicResume } from '../api/resume';
+import { Button } from '../components/ui/Button';
+import { useAuth } from '../hooks/useAuth';
+import { useToast } from '../components/ui/Toast';
+import { getMyContacts, sendContactRequest } from '../api/contacts';
 
 
 const DEGREE_LABELS: Record<Degree, string> = {
@@ -25,6 +29,13 @@ export default function ApplicantProfile() {
   const [resume, setResume] = useState<ResumeBundle | null>(null);
   const [resumeHidden, setResumeHidden] = useState(false);
 
+  const { user } = useAuth();
+  const { showToast } = useToast();
+  const [contactState, setContactState] = useState<'unknown' | 'none' | 'contact' | 'pending'>('unknown');
+  const [contactLoading, setContactLoading] = useState(false);
+
+
+  // Загрузка публичного профиля
   useEffect(() => {
     if (!id) return;
     async function load() {
@@ -40,13 +51,22 @@ export default function ApplicantProfile() {
     load();
   }, [id]);
 
-
+  // Загрузка резюме (read-only)
   useEffect(() => {
     if (!id) return;
     getPublicResume(id)
       .then(setResume)
       .catch(() => setResumeHidden(true));
-  }, [id])
+  }, [id]);
+
+  // Проверка: уже в контактах?
+  useEffect(() => {
+    if (!(user?.role === 'APPLICANT' && id && id !== user.id)) return;
+    getMyContacts()
+      .then(contacts => setContactState(contacts.some(c => c.userId === id) ? 'contact' : 'none'))
+      .catch(() => setContactState('none'));
+  }, [user, id]);
+
 
   if (loading) {
     return (
@@ -67,7 +87,25 @@ export default function ApplicantProfile() {
     );
   }
 
+
   const fullName = [profile.lastName, profile.firstName, profile.middleName].filter(Boolean).join(' ');
+  const canAddContact = user?.role === 'APPLICANT' && !!id && id !== user.id;
+
+  async function handleAddContact() {
+    if (!id) return;
+    setContactLoading(true);
+    try {
+      await sendContactRequest(id);
+      setContactState('pending');
+      showToast('Запрос добавления в контакты отправлен', 'success');
+    } catch (e: any) {
+      showToast(e?.response?.data?.error?.message || 'Не удалось отправить запрос', 'error');
+    } finally {
+      setContactLoading(false);
+    }
+  }
+
+
 
   return (
     <div className={styles.container}>
@@ -93,6 +131,21 @@ export default function ApplicantProfile() {
               <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>
                 {fullName || 'Имя не указано'}
               </h1>
+              {canAddContact && contactState !== 'unknown' && (
+                <div style={{ marginTop: '0.5rem' }}>
+                  {contactState === 'contact' ? (
+                    <Button variant="secondary" size="sm" disabled>
+                      <span className="material-symbols-rounded" style={{ fontSize: 16, marginRight: 4, verticalAlign: 'middle' }}>check</span>В контактах
+                    </Button>
+                  ) : contactState === 'pending' ? (
+                    <Button variant="secondary" size="sm" disabled>Запрос отправлен</Button>
+                  ) : (
+                    <Button variant="primary" size="sm" isLoading={contactLoading} onClick={handleAddContact}>
+                      Добавить в контакты
+                    </Button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
