@@ -68,6 +68,13 @@
     margin-bottom: 1rem;
 }
 
+@media (max-width: 600px) {
+    .cardHeader {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+}
+
 .cardTitle {
     font-size: 1.1rem;
     font-weight: 600;
@@ -89,6 +96,14 @@
 @media (max-width: 768px) {
     .grid {
         grid-template-columns: 1fr;
+    }
+
+    .grid > * {  /*разрешение карточкам: избранное, мои отклики, нетворкиг сжиматься еще уже*/
+        min-width: 0;
+    }
+
+    .card {
+        overflow-x: hidden;
     }
 
     .pageTitle {
@@ -139,10 +154,13 @@
 }
 
 .profileName {
-    font-size: 1.15rem;
+    font-family: var(--font-body);
+    font-size: 1.4rem;
     font-weight: 600;
+    letter-spacing: -0.01em;
     color: var(--color-text-primary);
     margin: 0;
+    line-height: 1.2;
 }
 
 .profileEmail {
@@ -155,7 +173,7 @@
 .detailsGrid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+    gap: 1.25rem 1rem;
 }
 
 .detailItem {
@@ -169,11 +187,12 @@
 }
 
 .detailLabel {
-    font-size: 0.8rem;
-    font-weight: 600;
+    font-size: 0.7rem;
+    font-weight: 700;
     color: var(--color-text-secondary);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.1em;
+    opacity: 0.75;
 }
 
 .detailValue {
@@ -685,4 +704,31 @@
     border: 1px solid var(--border, #d1d5db);
     font-size: 13px;
     background: var(--bg-primary, #fff);
+}
+
+
+.detailLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--color-accent);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.35rem 0.7rem;
+    background: rgba(232, 98, 44, 0.08);
+    border-radius: 999px;
+    transition: background 0.15s;
+    max-width: 100%;
+}
+
+.detailLink:hover {
+    background: rgba(232, 98, 44, 0.16);
+}
+
+@media (max-width: 600px) {
+    .detailsGrid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
 }

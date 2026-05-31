@@ -137,4 +137,8 @@
         gap: 1rem;
         text-align: center;
     }
+
+    .column {
+        display: none; /* скрыть в мобильном режиме */
+    }
 }

@@ -621,8 +621,9 @@ export function ApplicantDashboard() {
                 {profile?.portfolioUrl && (
                   <div className={styles.detailItem}>
                     <span className={styles.detailLabel}>Портфолио</span>
-                    <a href={profile.portfolioUrl} target="_blank" rel="noopener noreferrer" className={styles.detailLink || styles.detailValue}>
-                      {profile.portfolioUrl}
+                    <a href={profile.portfolioUrl} target="_blank" rel="noopener noreferrer" className={styles.detailLink}>
+                      Открыть портфолио
+                      <span className="material-symbols-rounded" style={{ fontSize: 14 }}>arrow_outward</span>
                     </a>
                   </div>
                 )}
@@ -766,6 +767,8 @@ export function ApplicantDashboard() {
             <div style={{
               display: 'flex', gap: '0.25rem', marginBottom: '1rem',
               borderBottom: '1px solid var(--color-border)',
+              overflowX: 'auto', // скролл вкладок в нетворкинге
+              scrollbarWidth: 'thin',
             }}>
               {([
                 { key: 'contacts' as const, label: 'Контакты', count: contacts.length },
@@ -782,6 +785,8 @@ export function ApplicantDashboard() {
                     color: contactsTab === tab.key ? 'var(--color-accent)' : 'var(--color-text-secondary)',
                     background: 'none', border: 'none', cursor: 'pointer',
                     borderBottom: contactsTab === tab.key ? '2px solid var(--color-accent)' : '2px solid transparent',
+                    flexShrink: 0,
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   {tab.label}

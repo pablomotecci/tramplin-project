@@ -106,19 +106,28 @@
 
 /* Адаптивность под мобильные устройства */
 @media (max-width: 600px) {
+  .container {
+    padding: 0 0.75rem;
+  }
+
+  .logoText {
+    display: none;
+  }
+
+  .actions {
+    gap: 0.5rem;
+  }
+
   .profileInfo {
     display: none;
   }
 
-  .container {
-    padding: 0 1rem;
+  .profileLink {
+    padding: 0.25rem;
   }
 
   .authButtons {
     gap: 0.25rem;
   }
 
-  .logoText {
-    font-size: 1.1rem;
-  }
 }
