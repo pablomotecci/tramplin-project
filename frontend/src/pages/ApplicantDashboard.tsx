@@ -26,6 +26,7 @@ import { getApplicantTags, updateApplicantTags } from '../api/applicant';
 import type { Tag } from '../types';
 import { SkeletonList } from '../components/ui/Skeleton';
 import { EmptyState } from '../components/ui/EmptyState';
+import { useToast } from '../components/ui/Toast';
 
 
 
@@ -78,6 +79,8 @@ export function ApplicantDashboard() {
   const [pwLoading, setPwLoading] = useState(false);
   const [pwError, setPwError] = useState<string | null>(null);
   const [pwSuccess, setPwSuccess] = useState(false);
+
+  const { showToast } = useToast();
 
 
 
@@ -197,8 +200,10 @@ export function ApplicantDashboard() {
       await respondToContactRequest(requestId, status);
       setIncomingRequests(prev => prev.filter(r => r.id !== requestId));
       if (status === 'ACCEPTED') loadContacts();
+      showToast( status === 'ACCEPTED' ? 'Контакт добавлен ✅' : 'Запрос отклонён', 'success');
     } catch (err) {
       alert(getErrorMessage(err));
+      showToast('Не удалось обработать запрос', 'error');
     } finally {
       setContactActionLoading(null);
     }
@@ -210,8 +215,10 @@ export function ApplicantDashboard() {
       setContactActionLoading(contactRequestId);
       await removeContact(contactRequestId);
       setContacts(prev => prev.filter(c => c.contactRequestId !== contactRequestId));
+      showToast('Контакт удалён', 'success');
     } catch (err) {
       alert(getErrorMessage(err));
+      showToast('Не удалось удалить контакт', 'error');
     } finally {
       setContactActionLoading(null);
     }
@@ -223,8 +230,10 @@ export function ApplicantDashboard() {
     try {
       setPrivacySaving(true);
       await updatePrivacySettings({ [field]: value });
+      showToast('Настройки приватности обновлены ✔', 'success');
     } catch (err) {
       alert(getErrorMessage(err));
+      showToast('Не удалось сохранить настройки', 'error');
     } finally {
       setPrivacySaving(false);
     }
@@ -242,8 +251,11 @@ export function ApplicantDashboard() {
       setPwSuccess(true);
       setPwOld(''); setPwNew(''); setPwConfirm('');
       setTimeout(() => setPwSuccess(false), 3000);
+      showToast('Пароль изменён ✅', 'success');
     } catch (err) {
-      setPwError(getErrorMessage(err));
+      const msg = getErrorMessage(err);
+      setPwError(msg);
+      showToast(msg, 'error');
     } finally {
       setPwLoading(false);
     }
@@ -337,6 +349,7 @@ export function ApplicantDashboard() {
       setSuccessMsg('Профиль сохранён');
       // скрыть сообщение черзе 3 секунды
       setTimeout(() => setSuccessMsg(null), 3000);
+      showToast('Профиль сохранён ✅', 'success');
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {

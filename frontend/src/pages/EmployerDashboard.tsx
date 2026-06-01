@@ -21,6 +21,7 @@ import { getCandidatesForOpportunity, type ApplicantScore } from '../api/scoring
 import { FileUpload } from '../components/ui/FileUpload';
 import { SkeletonList } from '../components/ui/Skeleton';
 import { EmptyState } from '../components/ui/EmptyState';
+import { useToast } from '../components/ui/Toast';
 
 
 
@@ -127,6 +128,8 @@ export function EmployerDashboard() {
   const [verifEmail, setVerifEmail] = useState('');
   const [verifLoading, setVerifLoading] = useState(false);
   const [verifError, setVerifError] = useState<string | null>(null);
+
+  const { showToast } = useToast();
 
   const [form, setForm] = useState<UpdateCompanyRequest>({
     companyName: '',
@@ -264,8 +267,11 @@ export function EmployerDashboard() {
     try {
       const updated = await changeOpportunityStatus(id, status);
       setOpportunities(prev => prev.map(o => o.id === id ? updated : o));
+      showToast('Статус вакансии изменён ✔', 'success');
     } catch (err) {
-      setError(getErrorMessage(err));
+      const msg = getErrorMessage(err);
+      setError(msg);
+      showToast(msg, 'error');
     } finally {
       setStatusChangingId(null);
     }
@@ -277,8 +283,11 @@ export function EmployerDashboard() {
     try {
       await deleteOpportunity(id);
       setOpportunities(prev => prev.filter(o => o.id !== id));
+      showToast('Вакансия удалена ✔', 'success');
     } catch (err) {
-      setError(getErrorMessage(err));
+      const msg = getErrorMessage(err);
+      setError(msg);
+      showToast(msg, 'error');
     } finally {
       setDeletingId(null);
     }
@@ -318,8 +327,7 @@ export function EmployerDashboard() {
       const updated = await updateCompanyProfile(form);
       setProfile(updated);
       setIsEditing(false);
-      setSuccessMsg('Профиль компании сохранён');
-      setTimeout(() => setSuccessMsg(null), 3000);
+      showToast('Профиль компании сохранён ✔', 'success');
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
@@ -369,8 +377,11 @@ export function EmployerDashboard() {
     try {
       const updated = await updateApplicationStatus(appId, { status: newStatus });
       setApps(prev => prev.map(a => a.id === appId ? updated : a));
+      showToast('Статус отклика обновлён ✅', 'success');
     } catch (err) {
-      console.error('Ошибка смены статуса:', err);
+      const msg = getErrorMessage(err);
+      setError(msg);
+      showToast(msg, 'error');
     } finally {
       setUpdatingAppId(null);
     }

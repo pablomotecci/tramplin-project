@@ -9,6 +9,7 @@ import { getTags, offerTag } from '../api/tags';
 import type { Tag } from '../types';
 import { TagCategory } from '../types';
 import { Skeleton } from '../components/ui/Skeleton';
+import { useToast } from '../components/ui/Toast';
 
 /*
   Страница создания карточки возможности
@@ -54,6 +55,8 @@ export default function CreateOpportunity() {
   const [offerTagCategory, setOfferTagCategory] = useState<TagCategory>(TagCategory.TOOL);
   const [offerTagLoading, setOfferTagLoading] = useState(false);
   const [offerTagMsg, setOfferTagMsg] = useState<string | null>(null);
+
+  const { showToast } = useToast();
 
   async function handleOfferTag() {
     if (!offerTagName.trim()) return;
@@ -179,11 +182,12 @@ export default function CreateOpportunity() {
         };
 
     await createOpportunity(payload);
+    showToast('Вакансия опубликована ✅', 'success');
     navigate('/company'); // Возврат в ЛК работодателя
     } catch (err: any) {
-      const message =
-        err?.response?.data?.error?.message || 'Не удалось создать карточку. Попробуйте позже.';
+      const message = err?.response?.data?.error?.message || 'Не удалось создать карточку. Попробуйте позже.';
       setError(message);
+      showToast(message, 'error'); 
     } finally {
       setLoading(false);
     }

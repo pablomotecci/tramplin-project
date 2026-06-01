@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { addFavorite, removeFavoriteApi, getMyFavorites } from '../api/favorites';
+import { useToast } from '../components/ui/Toast';
 
 const STORAGE_KEY = 'tramplin_favorites';
 
@@ -40,6 +41,7 @@ function isAuthenticated(): boolean {
 
 export function useFavorites() {
   const [favorites, setFavorites] = useState<FavoriteItem[]>(loadFromStorage);
+  const { showToast } = useToast();
   const syncingRef = useRef(false);
 
   useEffect(() => {
@@ -109,16 +111,26 @@ export function useFavorites() {
           } else {
             await addFavorite(id);
           }
+          showToast(
+            exists ? 'Удалено из избранного' : 'Добавлено в избранное ✔',
+            exists ? 'info' : 'success'
+          );
         } catch (err) {
           console.error('Ошибка синхронизации избранного:', err);
           setFavorites(favorites);
           saveToStorage(favorites);
+          showToast('Не удалось обновить избранное', 'error');
         }
+      } else {
+        showToast(
+          exists ? 'Удалено из избранного' : 'Добавлено в избранное ✔',
+          exists ? 'info' : 'success'
+        );
       }
 
       syncingRef.current = false;
     },
-    [favorites]
+    [favorites, showToast]
   );
 
   const removeFavorite = useCallback(
@@ -126,6 +138,7 @@ export function useFavorites() {
       const next = favorites.filter((f) => f.id !== id);
       setFavorites(next);
       saveToStorage(next);
+      showToast('Удалено из избранного', 'info');
 
       if (isAuthenticated()) {
         try {
@@ -135,7 +148,7 @@ export function useFavorites() {
         }
       }
     },
-    [favorites]
+    [favorites, showToast]
   );
 
   const getFavoriteIds = useCallback(

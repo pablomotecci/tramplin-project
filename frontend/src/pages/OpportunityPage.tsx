@@ -8,6 +8,8 @@ import styles from './OpportunityPage.module.css';
 import { useFavorites } from '../hooks/useFavorites';
 import { createApplication } from '../api/applications';
 import { SkeletonCard } from '../components/ui/Skeleton';
+import { useToast } from '../components/ui/Toast';
+
 /*
   Публичная страница просмотра карточки возможности.
   Доступна всем — авторизованным и гостям.
@@ -29,6 +31,8 @@ export default function OpportunityPage() {
   const [applySuccess, setApplySuccess] = useState(false);
   const [applyError, setApplyError] = useState<string | null>(null);
 
+  const { showToast } = useToast();
+
   async function handleApply() {
     if (!id) return;
     setApplying(true);
@@ -38,9 +42,11 @@ export default function OpportunityPage() {
       setApplySuccess(true);
       setShowApplyModal(false);
       setCoverLetter('');
+      showToast('Отклик отправлен ✅', 'success');
     } catch (err: any) {
       const msg = err?.response?.data?.error?.message || 'Не удалось отправить отклик';
       setApplyError(msg);
+      showToast(msg, 'error');
     } finally {
       setApplying(false);
     }

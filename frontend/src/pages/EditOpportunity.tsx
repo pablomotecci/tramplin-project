@@ -7,6 +7,7 @@ import styles from './CreateOpportunity.module.css';
 import { getTags } from '../api/tags';
 import type { Tag } from '../types';
 import { Skeleton } from '../components/ui/Skeleton';
+import { useToast } from '../components/ui/Toast';
 
 export default function EditOpportunity() {
   const { id } = useParams<{ id: string }>();
@@ -24,6 +25,8 @@ export default function EditOpportunity() {
   const [error, setError] = useState<string | null>(null);
   const [allTags, setAllTags] = useState<Tag[]>([]);
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+
+  const { showToast } = useToast();
 
   useEffect(() => {
     async function load() {
@@ -86,9 +89,12 @@ export default function EditOpportunity() {
         tagIds: selectedTagIds.length > 0 ? selectedTagIds : undefined,
       };
       await updateOpportunity(id!, payload);
+      showToast('Изменения сохранены ✔', 'success');
       navigate('/company');
     } catch (err: any) {
-      setError(err?.response?.data?.error?.message || 'Не удалось сохранить');
+      const msg = err?.response?.data?.error?.message || 'Не удалось сохранить';
+      setError(msg);
+      showToast(msg, 'error');
     } finally {
       setLoading(false);
     }

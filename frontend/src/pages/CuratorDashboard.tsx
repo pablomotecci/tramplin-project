@@ -13,6 +13,7 @@ import type { UserManagementResponse, VerificationRequestResponse, ModerationLog
 import styles from './Dashboard.module.css';
 import { SkeletonProfile } from '../components/ui/Skeleton';
 import { EmptyState } from '../components/ui/EmptyState';
+import { useToast } from '../components/ui/Toast';
 
 
 
@@ -111,8 +112,10 @@ function formatDateTime(iso: string): string {
 }
 
 
+
 export function CuratorDashboard() {
   const { user } = useAuth();
+
   const isAdmin = user?.role === 'ADMIN';
 
   const [activeTab, setActiveTab] = useState<TabKey>('verification');
@@ -169,6 +172,7 @@ export function CuratorDashboard() {
 
 // Верификация компаний
 function VerificationTab() {
+  const { showToast } = useToast();
   const [requests, setRequests] = useState<VerificationRequestResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -176,6 +180,7 @@ function VerificationTab() {
 
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState('');
+  
 
   const loadData = useCallback(async () => {
     try {
@@ -197,8 +202,11 @@ function VerificationTab() {
       setActionLoading(id);
       await approveVerification(id);
       setRequests(prev => prev.filter(r => r.id !== id));
+      showToast('Компания верифицирована ✔', 'success');
     } catch (e) {
-      alert(getErrorMessage(e));
+      const msg = getErrorMessage(e);
+      setError(msg);
+      showToast(msg, 'error');
     } finally {
       setActionLoading(null);
     }
@@ -212,8 +220,11 @@ function VerificationTab() {
       setRequests(prev => prev.filter(r => r.id !== rejectingId));
       setRejectingId(null);
       setRejectReason('');
+      showToast('Заявка отклонена ☑', 'success');
     } catch (e) {
-      alert(getErrorMessage(e));
+      const msg = getErrorMessage(e);
+      setError(msg);
+      showToast(msg, 'error');
     } finally {
       setActionLoading(null);
     }
@@ -324,6 +335,7 @@ function VerificationTab() {
 
 
 function ModerationTab() {
+  const { showToast } = useToast();
   const [opportunities, setOpportunities] = useState<OpportunityResponse[]>([]);
   const [users, setUsers] = useState<UserManagementResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -363,8 +375,11 @@ function ModerationTab() {
       ));
       setReasonFor(null);
       setReason('');
+      showToast('Вакансия скрыта', 'success')
     } catch (e) {
-      alert(getErrorMessage(e));
+      const msg = getErrorMessage(e);
+      setError(msg);
+      showToast(msg, 'error');
     } finally {
       setActionLoading(null);
     }
@@ -377,8 +392,11 @@ function ModerationTab() {
       setOpportunities(prev => prev.map(o =>
         o.id === id ? { ...o, status: 'ACTIVE' as any } : o
       ));
+      showToast('Вакансия снова видна ✔', 'success');
     } catch (e) {
-      alert(getErrorMessage(e));
+      const msg = getErrorMessage(e);
+      setError(msg);
+      showToast(msg, 'error');
     } finally {
       setActionLoading(null);
     }
@@ -394,8 +412,11 @@ function ModerationTab() {
       ));
       setReasonFor(null);
       setReason('');
+      showToast('Пользователь заблокирован', 'success');
     } catch (e) {
-      alert(getErrorMessage(e));
+      const msg = getErrorMessage(e);
+      setError(msg);
+      showToast(msg, 'error');
     } finally {
       setActionLoading(null);
     }
@@ -408,8 +429,11 @@ function ModerationTab() {
       setUsers(prev => prev.map(u =>
         u.id === id ? { ...u, status: 'ACTIVE' as AccountStatus } : u
       ));
+      showToast('Пользователь разблокирован ✔', 'success');
     } catch (e) {
-      alert(getErrorMessage(e));
+      const msg = getErrorMessage(e);
+      setError(msg);
+      showToast(msg, 'error');
     } finally {
       setActionLoading(null);
     }
@@ -421,8 +445,11 @@ function ModerationTab() {
     try {
       const result = await resetUserPassword(userId);
       setTempPassword({ userId: result.userId, password: result.temporaryPassword });
+      showToast('Новый пароль отправлен на email пользователя ✔', 'success');
     } catch (err) {
-      alert(getErrorMessage(err));
+      const msg = getErrorMessage(err);
+      setError(msg);
+      showToast(msg, 'error');
     } finally {
       setResetLoading(null);
     }
@@ -475,13 +502,13 @@ function ModerationTab() {
                     <button className={styles.oppBtnDelete} title="Скрыть"
                       disabled={actionLoading === opp.id}
                       onClick={() => { setReasonFor(`opp-${opp.id}`); setReason(''); }}>
-                      <span className="material-symbols-rounded" style={{ fontSize: '18px' }}>visibility_off</span>
+                      <span className="material-symbols-rounded" style={{ fontSize: '18px' }}>visibility</span>
                     </button>
                   ) : (
                     <button className={styles.oppBtnEdit} title="Восстановить"
                       disabled={actionLoading === opp.id}
                       onClick={() => handleUnhide(opp.id)}>
-                      <span className="material-symbols-rounded" style={{ fontSize: '18px' }}>visibility</span>
+                      <span className="material-symbols-rounded" style={{ fontSize: '18px' }}>visibility_off</span>
                     </button>
                   )}
                 </div>
@@ -595,6 +622,7 @@ function ModerationTab() {
 
 // Теги
 function TagsTab() {
+  const { showToast } = useToast();
   const [pendingTags, setPendingTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -625,8 +653,11 @@ function TagsTab() {
       setActionLoading(id);
       await approveTag(id);
       setPendingTags(prev => prev.filter(t => t.id !== id));
+      showToast('Тег одобрен ✅', 'success');
     } catch (e) {
-      alert(getErrorMessage(e));
+      const msg = getErrorMessage(e);
+      setError(msg);
+      showToast(msg, 'error');
     } finally {
       setActionLoading(null);
     }
@@ -638,8 +669,11 @@ function TagsTab() {
       setActionLoading(id);
       await rejectTag(id);
       setPendingTags(prev => prev.filter(t => t.id !== id));
+      showToast('Тег отклонён', 'success');
     } catch (e) {
-      alert(getErrorMessage(e));
+      const msg = getErrorMessage(e);
+      setError(msg);
+      showToast(msg, 'error');
     } finally {
       setActionLoading(null);
     }
@@ -654,8 +688,12 @@ function TagsTab() {
       await createTagByCurator({ name: newTagName.trim(), category: newTagCategory });
       setNewTagName('');
       setShowForm(false);
+      showToast('Тег создан ✅', 'success');
     } catch (err) {
       setFormError(getErrorMessage(err));
+      const msg = getErrorMessage(err);
+      setError(msg);
+      showToast(msg, 'error');
     } finally {
       setFormLoading(false);
     }
@@ -911,6 +949,7 @@ function LogsTab() {
 
 // Создание кураторов только админом
 function CuratorsTab() {
+  const { showToast } = useToast();
   const [curators, setCurators] = useState<UserManagementResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -962,8 +1001,12 @@ function CuratorsTab() {
       setDisplayName('');
       setPassword('');
       setFormSuccess(`Куратор «${newCurator.displayName}» успешно создан!`);
+      showToast('Куратор создан ✅', 'success');
     } catch (err) {
       setFormError(getErrorMessage(err));
+      const msg = getErrorMessage(err);
+      setError(msg);
+      showToast(msg, 'error');
     } finally {
       setFormLoading(false);
     }
