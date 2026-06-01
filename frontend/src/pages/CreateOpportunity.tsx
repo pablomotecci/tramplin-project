@@ -8,6 +8,7 @@ import { getCompanyProfile } from '../api/employer';
 import { getTags, offerTag } from '../api/tags';
 import type { Tag } from '../types';
 import { TagCategory } from '../types';
+import { Skeleton } from '../components/ui/Skeleton';
 
 /*
   Страница создания карточки возможности
@@ -190,7 +191,17 @@ export default function CreateOpportunity() {
 
   // Проверка доступа: только верифицированный работодатель
   if (verified === null) {
-    return <div className={styles.container}>Загрузка...</div>;
+    return (
+      <div className={styles.container}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '700px' }}>
+          <Skeleton width="40%" height="2rem" />
+          <Skeleton width="100%" height="3rem" />
+          <Skeleton width="100%" height="6rem" />
+          <Skeleton width="100%" height="3rem" />
+          <Skeleton width="60%" height="3rem" />
+        </div>
+      </div>
+    );
   }
 
   if (!verified) {
@@ -411,7 +422,7 @@ export default function CreateOpportunity() {
               })}
             </div>
           ) : (
-            <p className={styles.hint}>Загрузка тегов...</p>
+            <Skeleton width="120px" height="14px" />
           )}
 
           {selectedTagIds.length > 0 && (

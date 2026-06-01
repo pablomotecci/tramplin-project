@@ -8,6 +8,7 @@ import { Button } from '../components/ui/Button';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../components/ui/Toast';
 import { getMyContacts, sendContactRequest } from '../api/contacts';
+import { SkeletonProfile } from '../components/ui/Skeleton';
 
 
 const DEGREE_LABELS: Record<Degree, string> = {
@@ -71,7 +72,7 @@ export default function ApplicantProfile() {
   if (loading) {
     return (
       <div className={styles.container}>
-        <div className={styles.skeleton}>Загрузка профиля...</div>
+        <SkeletonProfile />
       </div>
     );
   }

@@ -19,6 +19,8 @@ import { SkeletonProfile } from '../components/ui/Skeleton';
 import { getRecommendationsByOpportunity, type RecommendationResponse } from '../api/recommendations';
 import { getCandidatesForOpportunity, type ApplicantScore } from '../api/scoring';
 import { FileUpload } from '../components/ui/FileUpload';
+import { SkeletonList } from '../components/ui/Skeleton';
+import { EmptyState } from '../components/ui/EmptyState';
 
 
 
@@ -726,14 +728,14 @@ export function EmployerDashboard() {
               Создание вакансий станет доступно после верификации компании.
             </p>
           ) : oppsLoading ? (
-            <p className={styles.placeholder}>Загрузка вакансий...</p>
+            <SkeletonList count={3} />
           ) : opportunities.length === 0 ? (
-            <div className={styles.emptyState}>
-              <p>У вас пока нет вакансий.</p>
-              <Button size="sm" onClick={() => navigate('/company/opportunities/new')}>
-                Создать первую
-              </Button>
-            </div>
+            <EmptyState
+              icon="work_outline"
+              title="У вас пока нет вакансий"
+              description="Создай первую — и студенты смогут на неё откликнуться"
+              action={<Button size="sm" onClick={() => navigate('/company/opportunities/new')}>Создать вакансию</Button>}
+            />
           ) : (
             <div className={styles.opportunitiesList}>
               {opportunities.map(opp => (
@@ -868,11 +870,13 @@ export function EmployerDashboard() {
           </div>
 
           {appsLoading ? (
-            <p className={styles.placeholder}>Загрузка откликов...</p>
+            <SkeletonList count={3} />
           ) : apps.length === 0 ? (
-            <p className={styles.placeholder}>
-              {statusFilter ? 'Нет откликов с таким статусом' : 'Пока нет откликов на ваши вакансии'}
-            </p>
+            <EmptyState
+              icon={statusFilter ? "filter_alt_off" : "mark_email_unread"}
+              title={statusFilter ? "Нет откликов с таким статусом" : "Пока нет откликов"}
+              description={statusFilter ? "Попробуй сбросить фильтр" : "Когда соискатели откликнутся на твои вакансии, они появятся здесь"}
+            />
           ) : (
             <div className={styles.appsTable}>
               {apps.map(app => (

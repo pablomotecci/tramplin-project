@@ -24,6 +24,8 @@ import { FileUpload } from '../components/ui/FileUpload';
 import { getTags } from '../api/tags';
 import { getApplicantTags, updateApplicantTags } from '../api/applicant';
 import type { Tag } from '../types';
+import { SkeletonList } from '../components/ui/Skeleton';
+import { EmptyState } from '../components/ui/EmptyState';
 
 
 
@@ -690,9 +692,14 @@ export function ApplicantDashboard() {
               <h2 className={styles.cardTitle}><span className="material-symbols-rounded">patient_list</span> Мои отклики</h2>
             </div>
             {appsLoading ? (
-              <p className={styles.placeholder}>Загрузка...</p>
+              <SkeletonList count={2} />
             ) : applications.length === 0 ? (
-              <p className={styles.placeholder}>У вас пока нет откликов</p>
+              <EmptyState
+                icon="description"
+                title="Откликов пока нет"
+                description="Найди интересную вакансию и откликнись — статус появится здесь"
+                action={<Button size="sm" onClick={() => navigate('/')}>Найти вакансии</Button>}
+              />
             ) : (
               <div className={styles.appsTable}>
                 {applications.map(app => (
@@ -731,9 +738,13 @@ export function ApplicantDashboard() {
               <h2 className={styles.cardTitle}><span className="material-symbols-rounded">bookmarks</span> Избранное</h2>
             </div>
             {favsLoading ? (
-              <p className={styles.placeholder}>Загрузка...</p>
+              <SkeletonList count={2} />
             ) : favOpportunities.length === 0 ? (
-              <p className={styles.placeholder}>Нет сохранённых вакансий</p>
+              <EmptyState
+                icon="bookmark_border"
+                title="Нет сохранённых вакансий"
+                description="Кликни на сердечко рядом с вакансией — она появится здесь"
+              />
             ) : (
               <div className={styles.favList}>
                 {favOpportunities.map(opp => (
@@ -805,12 +816,14 @@ export function ApplicantDashboard() {
             {/* Мои контакты */}
             {contactsTab === 'contacts' && (
               contactsLoading ? (
-                <p className={styles.placeholder}>Загрузка...</p>
+                <SkeletonList count={2} />
               ) : contacts.length === 0 ? (
-                <div className={styles.emptyState}>
-                  <span className="material-symbols-rounded" style={{ fontSize: '36px', opacity: 0.4 }}>person_add</span>
-                  <p>У вас пока нет контактов</p>
-                </div>
+                <EmptyState
+                  icon="group_add"
+                  title="У вас пока нет контактов"
+                  description="Добавляй других студентов и выпускников, чтобы строить профессиональную сеть"
+                  action={<Button size="sm" onClick={() => navigate('/applicants')}>Найти студентов</Button>}
+                />
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   {contacts.map(c => (
@@ -839,10 +852,11 @@ export function ApplicantDashboard() {
             {/* Входящие запросы */}
             {contactsTab === 'requests' && (
               incomingRequests.length === 0 ? (
-                <div className={styles.emptyState}>
-                  <span className="material-symbols-rounded" style={{ fontSize: '36px', opacity: 0.4 }}>mail</span>
-                  <p>Нет входящих запросов</p>
-                </div>
+                <EmptyState
+                  icon="inbox"
+                  title="Нет входящих запросов"
+                  description="Когда кто-то захочет добавить тебя в контакты, заявка появится здесь"
+                />
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   {incomingRequests.map(req => (
@@ -872,12 +886,13 @@ export function ApplicantDashboard() {
             {/* Рекомендации */}
             {contactsTab === 'recommendations' && (
               recsLoading ? (
-                <p className={styles.placeholder}>Загрузка...</p>
+                <SkeletonList count={2} />
               ) : recommendations.length === 0 ? (
-                <div className={styles.emptyState}>
-                  <span className="material-symbols-rounded" style={{ fontSize: '36px', opacity: 0.4 }}>recommend</span>
-                  <p>Вас пока никто не рекомендовал</p>
-                </div>
+                <EmptyState
+                  icon="auto_awesome"
+                  title="Пока нет рекомендаций"
+                  description="Заполни больше навыков в профиле — мы подберём вакансии, которые тебе подходят"
+                />
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   {recommendations.map(rec => (
@@ -907,7 +922,7 @@ export function ApplicantDashboard() {
             {/* Приватность */}
             {contactsTab === 'privacy' && (
               privacyLoading ? (
-                <p className={styles.placeholder}>Загрузка...</p>
+                <SkeletonList count={3} />
               ) : !privacy ? (
                 <p className={styles.placeholder}>Не удалось загрузить настройки</p>
               ) : (

@@ -107,11 +107,30 @@
     }
 
     .pageTitle {
-        font-size: 1.5rem;
+        display: none;
+    }
+
+    .pageHeader {
+        margin-bottom: 1rem;
     }
 
     .formRow {
         grid-template-columns: 1fr !important;
+    }
+
+    .oppCard {
+        grid-template-columns: 1fr !important;
+        row-gap: 0.5rem;
+    }
+
+    .oppCard .oppActions {
+        justify-self: end;
+        margin-left: 0 !important;
+    }
+
+    .oppMeta {
+        flex-wrap: wrap;
+        gap: 0.5rem 1rem;
     }
 }
 
@@ -380,9 +399,11 @@
 }
 
 .oppCard {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 1rem;
+    row-gap: 0.75rem;
     align-items: center;
-    justify-content: space-between;
     padding: 1rem 1.25rem;
     background: var(--color-bg);
     border: 1px solid var(--color-border);
@@ -731,4 +752,18 @@
         grid-template-columns: 1fr;
         gap: 1rem;
     }
+
+    .tagCreateGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+
+
+.tagCreateGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 0.75rem;
+    align-items: end;
 }

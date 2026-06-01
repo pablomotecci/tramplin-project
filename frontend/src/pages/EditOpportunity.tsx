@@ -6,6 +6,7 @@ import { OpportunityType, WorkFormat } from '../types';
 import styles from './CreateOpportunity.module.css';
 import { getTags } from '../api/tags';
 import type { Tag } from '../types';
+import { Skeleton } from '../components/ui/Skeleton';
 
 export default function EditOpportunity() {
   const { id } = useParams<{ id: string }>();
@@ -93,7 +94,17 @@ export default function EditOpportunity() {
     }
   }
 
-  if (pageLoading) return <div className={styles.container}>Загрузка...</div>;
+  if (pageLoading) return (
+    <div className={styles.container}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '700px' }}>
+        <Skeleton width="40%" height="2rem" />
+        <Skeleton width="100%" height="3rem" />
+        <Skeleton width="100%" height="6rem" />
+        <Skeleton width="100%" height="3rem" />
+        <Skeleton width="60%" height="3rem" />
+      </div>
+    </div>
+  );
 
   return (
     <div className={styles.container}>

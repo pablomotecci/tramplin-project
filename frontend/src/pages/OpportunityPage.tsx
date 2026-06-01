@@ -7,6 +7,7 @@ import { OpportunityType, WorkFormat } from '../types';
 import styles from './OpportunityPage.module.css';
 import { useFavorites } from '../hooks/useFavorites';
 import { createApplication } from '../api/applications';
+import { SkeletonCard } from '../components/ui/Skeleton';
 /*
   Публичная страница просмотра карточки возможности.
   Доступна всем — авторизованным и гостям.
@@ -67,7 +68,7 @@ export default function OpportunityPage() {
   if (loading) {
     return (
       <div className={styles.container}>
-        <div className={styles.skeleton}>Загрузка карточки...</div>
+        <SkeletonCard />
       </div>
     );
   }

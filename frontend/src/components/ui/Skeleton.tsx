@@ -56,3 +56,23 @@ export function SkeletonProfile() {
     </div>
   );
 }
+
+export function SkeletonRow() {
+  return (
+    <div className={styles.skeletonRow}>
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <Skeleton width="65%" height="14px" />
+        <Skeleton width="45%" height="12px" />
+      </div>
+      <Skeleton width="70px" height="22px" radius="999px" />
+    </div>
+  );
+}
+
+export function SkeletonList({ count = 2 }: { count?: number }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+      {Array.from({ length: count }).map((_, i) => <SkeletonRow key={i} />)}
+    </div>
+  );
+}

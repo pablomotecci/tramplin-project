@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getCompanyPublicProfile } from '../api/employer';
 import type { CompanyProfileResponse } from '../types';
 import styles from './OpportunityPage.module.css';
+import { SkeletonProfile } from '../components/ui/Skeleton';
 
 export default function CompanyProfile() {
   const { id } = useParams<{ id: string }>();
@@ -29,7 +30,7 @@ export default function CompanyProfile() {
   if (loading) {
     return (
       <div className={styles.container}>
-        <div className={styles.skeleton}>Загрузка профиля компании...</div>
+        <SkeletonProfile />
       </div>
     );
   }

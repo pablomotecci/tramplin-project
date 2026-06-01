@@ -12,6 +12,7 @@ import { TagCategory } from '../types';
 import type { UserManagementResponse, VerificationRequestResponse, ModerationLogResponse, Tag, OpportunityResponse, UserRole, AccountStatus } from '../types';
 import styles from './Dashboard.module.css';
 import { SkeletonProfile } from '../components/ui/Skeleton';
+import { EmptyState } from '../components/ui/EmptyState';
 
 
 
@@ -228,10 +229,11 @@ function VerificationTab() {
       </p>
 
       {requests.length === 0 ? (
-        <div className={styles.emptyState}>
-          <span className="material-symbols-rounded" style={{ fontSize: '48px', opacity: 0.4 }}>task_alt</span>
-          <p>Нет заявок на рассмотрение</p>
-        </div>
+        <EmptyState
+          icon="task_alt"
+          title="Очередь пуста"
+          description="Все заявки на верификацию обработаны"
+        />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           {requests.map(req => (
@@ -443,11 +445,15 @@ function ModerationTab() {
         </div>
 
         {activeOpps.length === 0 ? (
-          <p className={styles.placeholder}>Нет карточек для модерации</p>
+          <EmptyState
+            icon="verified"
+            title="Нет карточек для модерации"
+            description="Все возможности проверены и опубликованы"
+          />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {activeOpps.map(opp => (
-              <div key={opp.id} className={styles.oppCard} style={{ flexWrap: 'wrap' }}>
+              <div key={opp.id} className={styles.oppCard}>
                 <div className={styles.oppMain}>
                   <div className={styles.oppTop}>
                     <span className={styles.oppStatus} style={{
@@ -481,7 +487,7 @@ function ModerationTab() {
                 </div>
 
                 {reasonFor === `opp-${opp.id}` && (
-                  <div style={{ width: '100%', marginTop: '0.5rem', padding: '0.75rem', background: '#fef3cd', borderRadius: '8px' }}>
+                  <div style={{ gridColumn: '1 / -1', marginTop: '0.5rem', padding: '0.75rem', background: '#fef3cd', borderRadius: '8px' }}>
                     <input type="text" placeholder="Причина скрытия (необязательно)" value={reason}
                       onChange={e => setReason(e.target.value)}
                       style={{ width: '100%', padding: '0.4rem 0.6rem', marginBottom: '0.4rem',
@@ -673,27 +679,30 @@ function TagsTab() {
         <form onSubmit={handleCreateTag} className={styles.card} style={{ marginBottom: '1rem', padding: '1.25rem' }}>
           <h3 style={{ fontSize: '1rem', fontWeight: 600, margin: '0 0 0.75rem 0' }}>Новый тег (сразу одобрен)</h3>
           {formError && <div className={styles.errorBanner}>{formError}</div>}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '0.75rem', alignItems: 'end' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'flex-end' }}>
+          <div style={{ flex: '1 1 180px', minWidth: 0 }}>
             <Input label="Название" value={newTagName} onChange={e => setNewTagName(e.target.value)} placeholder="React, Python, Docker..." />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text)' }}>Категория</label>
-              <select value={newTagCategory} onChange={e => setNewTagCategory(e.target.value as TagCategory)}
-                className={styles.statusSelect} style={{ padding: '0.6rem 0.75rem', borderRadius: '10px' }}>
-                {Object.entries(TAG_CATEGORY_LABELS).map(([key, label]) => (
-                  <option key={key} value={key}>{label}</option>
-                ))}
-              </select>
-            </div>
-            <Button variant="primary" size="md" type="submit" isLoading={formLoading}>Создать</Button>
           </div>
+          <div style={{ flex: '1 1 140px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+            <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text)' }}>Категория</label>
+            <select value={newTagCategory} onChange={e => setNewTagCategory(e.target.value as TagCategory)}
+              className={styles.statusSelect} style={{ padding: '0.6rem 0.75rem', borderRadius: '10px' }}>
+              {Object.entries(TAG_CATEGORY_LABELS).map(([key, label]) => (
+                <option key={key} value={key}>{label}</option>
+              ))}
+            </select>
+          </div>
+          <Button variant="primary" size="md" type="submit" isLoading={formLoading}>Создать</Button>
+        </div>
         </form>
       )}
 
       {pendingTags.length === 0 ? (
-        <div className={styles.emptyState}>
-          <span className="material-symbols-rounded" style={{ fontSize: '48px', opacity: 0.4 }}>label_off</span>
-          <p>Нет тегов, ожидающих одобрения</p>
-        </div>
+        <EmptyState
+          icon="sell"
+          title="Нет тегов, ожидающих одобрения"
+          description="Когда работодатели предложат новые теги, они появятся здесь"
+        />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           {pendingTags.map(tag => (
@@ -780,10 +789,11 @@ function UsersTab() {
       {loading ? (
         <SkeletonProfile />
       ) : users.length === 0 ? (
-        <div className={styles.emptyState}>
-          <span className="material-symbols-rounded" style={{ fontSize: '48px', opacity: 0.4 }}>person_off</span>
-          <p>Пользователи не найдены</p>
-        </div>
+        <EmptyState
+          icon="person_search"
+          title="Пользователей не найдено"
+          description="Попробуй изменить параметры поиска"
+        />
       ) : (
         <>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -848,10 +858,11 @@ function LogsTab() {
       </p>
 
       {logs.length === 0 ? (
-        <div className={styles.emptyState}>
-          <span className="material-symbols-rounded" style={{ fontSize: '48px', opacity: 0.4 }}>receipt_long</span>
-          <p>Журнал пуст</p>
-        </div>
+        <EmptyState
+          icon="history"
+          title="Журнал пуст"
+          description="Здесь будут отображаться все действия модерации"
+        />
       ) : (
         <>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -992,7 +1003,11 @@ function CuratorsTab() {
         </div>
 
         {curators.length === 0 ? (
-          <p className={styles.placeholder}>Кураторов пока нет. Создайте первого выше.</p>
+          <EmptyState
+            icon="shield_person"
+            title="Кураторов пока нет"
+            description="Создай первого через форму выше"
+          />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {curators.map(c => (
