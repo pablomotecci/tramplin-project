@@ -11,6 +11,7 @@ import tramplin.entity.enums.OpportunityType;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Repository
@@ -31,6 +32,13 @@ public interface OpportunityRepository extends JpaRepository<Opportunity, UUID>,
            "LEFT JOIN FETCH o.employer " +
            "WHERE o.status = 'ACTIVE'")
     List<Opportunity> findAllActiveWithTagsAndEmployer();
+
+    @Query("SELECT DISTINCT o FROM Opportunity o " +
+           "LEFT JOIN FETCH o.tags t " +
+           "LEFT JOIN FETCH t.parent " +
+           "LEFT JOIN FETCH t.synonyms " +
+           "WHERE o.id IN :ids")
+    List<Opportunity> findAllByIdInWithTags(@Param("ids") Set<UUID> ids);
 
     List<Opportunity> findByStatus(OpportunityStatus status);
 

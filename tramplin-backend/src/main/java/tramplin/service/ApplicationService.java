@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tramplin.dto.application.ApplicationResponse;
+import tramplin.dto.application.ApplicationScoreSummary;
 import tramplin.dto.application.CreateApplicationRequest;
 import tramplin.dto.application.RecommendationSummary;
 import tramplin.dto.application.UpdateApplicationStatusRequest;
@@ -43,6 +44,7 @@ public class ApplicationService {
     private final OpportunityRepository opportunityRepository;
     private final CompanyRepository companyRepository;
     private final RecommendationRepository recommendationRepository;
+    private final ScoringService scoringService;
 
     @Transactional
     public ApplicationResponse createApplication(UserPrincipal principal, CreateApplicationRequest request) {
@@ -72,8 +74,8 @@ public class ApplicationService {
         Application saved = applicationRepository.save(application);
         log.info("Соискатель {} откликнулся на вакансию '{}'",
                 applicant.getFirstName() + " " + applicant.getLastName(), opportunity.getTitle());
-        // Только что созданный отклик не может иметь рекомендаций.
-        return mapToResponse(saved, Map.of());
+        // Только что созданный отклик: ни рекомендаций, ни score для работодателя ещё нет.
+        return mapToResponse(saved, AppEnrichment.empty());
     }
 
     @Transactional(readOnly = true)
@@ -82,9 +84,10 @@ public class ApplicationService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Профиль соискателя не найден для userId: " + principal.getUserId()));
 
-        // Соискатель смотрит свои отклики — рекомендации ему не показываем (спойлер соц. графа).
+        // Соискатель смотрит свои отклики — ни рекомендаций (спойлер соц. графа),
+        // ни score (его он видит через scoring-endpoint) ему здесь не показываем.
         return applicationRepository.findByApplicantId(applicant.getId(), pageable)
-                .map(app -> mapToResponse(app, Map.of()));
+                .map(app -> mapToResponse(app, AppEnrichment.empty()));
     }
 
     @Transactional(readOnly = true)
@@ -98,9 +101,9 @@ public class ApplicationService {
                 ? applicationRepository.findByOpportunityEmployerIdAndStatus(company.getId(), status, pageable)
                 : applicationRepository.findByOpportunityEmployerId(company.getId(), pageable);
 
-        // Один batch-запрос на всю страницу вместо N+1 по каждому отклику.
-        Map<AppKey, List<RecommendationSummary>> recs = loadRecommendationsFor(page.getContent());
-        return page.map(app -> mapToResponse(app, recs));
+        // Batch на всю страницу: рекомендации + score, без N+1.
+        AppEnrichment enrichment = enrichmentFor(page.getContent());
+        return page.map(app -> mapToResponse(app, enrichment));
     }
 
     @Transactional(readOnly = true)
@@ -110,15 +113,15 @@ public class ApplicationService {
 
         checkAccess(principal, application);
 
-        // Рекомендации видит только работодатель, принимающий решение по отклику.
-        // Соискателю их не показываем, чтобы не раскрывать факт рекомендации,
-        // который рекомендующий мог хотеть оставить непубличным.
+        // Рекомендации и score видит только работодатель, принимающий решение по отклику.
+        // Соискателю их не показываем: рекомендации — чтобы не раскрывать факт
+        // рекомендации (соц. граф), score — он доступен ему через scoring-endpoint.
         boolean isEmployer = application.getOpportunity().getEmployer().getUser().getId()
                 .equals(principal.getUserId());
-        Map<AppKey, List<RecommendationSummary>> recs = isEmployer
-                ? loadRecommendationsFor(List.of(application))
-                : Map.of();
-        return mapToResponse(application, recs);
+        AppEnrichment enrichment = isEmployer
+                ? enrichmentFor(List.of(application))
+                : AppEnrichment.empty();
+        return mapToResponse(application, enrichment);
     }
 
     @Transactional
@@ -140,8 +143,8 @@ public class ApplicationService {
         Application saved = applicationRepository.save(application);
         log.info("Статус отклика {} изменён на {} компанией {}",
                 id, request.getStatus(), company.getCompanyName());
-        // Меняет статус всегда работодатель — показываем рекомендации.
-        return mapToResponse(saved, loadRecommendationsFor(List.of(saved)));
+        // Меняет статус всегда работодатель — показываем рекомендации и score.
+        return mapToResponse(saved, enrichmentFor(List.of(saved)));
     }
 
     private void validateStatusTransition(ApplicationStatus current, ApplicationStatus next) {
@@ -169,6 +172,35 @@ public class ApplicationService {
      * applicantId == Application.applicant.id == Recommendation.recommended.id.
      */
     private record AppKey(UUID applicantId, UUID opportunityId) {}
+
+    /**
+     * Контейнер обогащения страницы откликов: рекомендации (ключ по ApplicantProfile.id)
+     * и score-совместимость (ключ по User.id). Две разные мапы с разными ключами.
+     */
+    private record AppEnrichment(
+            Map<AppKey, List<RecommendationSummary>> recommendations,
+            Map<ScoringService.ApplicationScoreKey, ApplicationScoreSummary> scores
+    ) {
+        static AppEnrichment empty() {
+            return new AppEnrichment(Map.of(), Map.of());
+        }
+    }
+
+    /** Загружает рекомендации и score одним batch'ем для пачки откликов (вид работодателя). */
+    private AppEnrichment enrichmentFor(List<Application> apps) {
+        return new AppEnrichment(loadRecommendationsFor(apps), loadScoresFor(apps));
+    }
+
+    private Map<ScoringService.ApplicationScoreKey, ApplicationScoreSummary> loadScoresFor(List<Application> apps) {
+        if (apps.isEmpty()) {
+            return Map.of();
+        }
+        Set<ScoringService.ApplicationScoreKey> keys = apps.stream()
+                .map(a -> new ScoringService.ApplicationScoreKey(
+                        a.getApplicant().getUser().getId(), a.getOpportunity().getId()))
+                .collect(Collectors.toSet());
+        return scoringService.calculateBatch(keys);
+    }
 
     /**
      * Batch-загрузка рекомендаций для всей страницы откликов: 1 SQL-запрос
@@ -207,9 +239,10 @@ public class ApplicationService {
                 .build();
     }
 
-    private ApplicationResponse mapToResponse(Application app,
-                                             Map<AppKey, List<RecommendationSummary>> recommendations) {
-        AppKey key = new AppKey(app.getApplicant().getId(), app.getOpportunity().getId());
+    private ApplicationResponse mapToResponse(Application app, AppEnrichment enrichment) {
+        AppKey recKey = new AppKey(app.getApplicant().getId(), app.getOpportunity().getId());
+        ScoringService.ApplicationScoreKey scoreKey = new ScoringService.ApplicationScoreKey(
+                app.getApplicant().getUser().getId(), app.getOpportunity().getId());
         return ApplicationResponse.builder()
                 .id(app.getId())
                 .status(app.getStatus())
@@ -224,7 +257,9 @@ public class ApplicationService {
                 .applicantLastName(app.getApplicant().getLastName())
                 .applicantEmail(app.getApplicant().getUser().getEmail())
                 // Всегда массив (возможно пустой) — стандарт наших DTO, фронту удобнее.
-                .recommendations(recommendations.getOrDefault(key, List.of()))
+                .recommendations(enrichment.recommendations().getOrDefault(recKey, List.of()))
+                // score: null для соискателя/нового отклика, заполнено для работодателя.
+                .scoreSummary(enrichment.scores().get(scoreKey))
                 .build();
     }
 }

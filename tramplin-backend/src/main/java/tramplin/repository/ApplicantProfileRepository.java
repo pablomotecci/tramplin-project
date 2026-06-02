@@ -9,6 +9,7 @@ import tramplin.entity.ApplicantProfile;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Repository
@@ -31,5 +32,13 @@ public interface ApplicantProfileRepository extends
            "LEFT JOIN FETCH t.synonyms " +
            "LEFT JOIN FETCH ap.user")
     List<ApplicantProfile> findAllWithTagsAndUser();
+
+    @Query("SELECT DISTINCT ap FROM ApplicantProfile ap " +
+           "LEFT JOIN FETCH ap.tags t " +
+           "LEFT JOIN FETCH t.parent " +
+           "LEFT JOIN FETCH t.synonyms " +
+           "LEFT JOIN FETCH ap.user u " +
+           "WHERE u.id IN :userIds")
+    List<ApplicantProfile> findAllByUserIdInWithTags(@Param("userIds") Set<UUID> userIds);
 }
 

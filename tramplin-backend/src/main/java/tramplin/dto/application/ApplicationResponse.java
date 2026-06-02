@@ -36,4 +36,8 @@ public class ApplicationResponse {
     // Для работодателя — рекомендации контактов соискателя на эту вакансию.
     // Соискателю всегда пустой массив (не раскрываем его соц. граф).
     private List<RecommendationSummary> recommendations;
+
+    // Для работодателя — совместимость соискателя с вакансией (прозрачность скоринга).
+    // Соискателю — null (свой score он видит через отдельный scoring-endpoint).
+    private ApplicationScoreSummary scoreSummary;
 }
