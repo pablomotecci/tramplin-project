@@ -169,7 +169,9 @@ public class ApplicationService {
 
     /**
      * Ключ для группировки рекомендаций по точной паре (соискатель, вакансия).
-     * applicantId == Application.applicant.id == Recommendation.recommended.id.
+     * Использует ApplicantProfile.id (НЕ User.id) — это внутренний join-ключ
+     * с Recommendation.recommended.id. Наружу в DTO ApplicationResponse.applicantId
+     * мы отдаём User.id (см. mapToResponse).
      */
     private record AppKey(UUID applicantId, UUID opportunityId) {}
 
@@ -252,7 +254,7 @@ public class ApplicationService {
                 .opportunityId(app.getOpportunity().getId())
                 .opportunityTitle(app.getOpportunity().getTitle())
                 .companyName(app.getOpportunity().getEmployer().getCompanyName())
-                .applicantId(app.getApplicant().getId())
+                .applicantId(app.getApplicant().getUser().getId())
                 .applicantFirstName(app.getApplicant().getFirstName())
                 .applicantLastName(app.getApplicant().getLastName())
                 .applicantEmail(app.getApplicant().getUser().getEmail())

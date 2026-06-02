@@ -170,7 +170,7 @@ public class ApplicantProfileService {
                 .opportunityId(app.getOpportunity().getId())
                 .opportunityTitle(app.getOpportunity().getTitle())
                 .companyName(app.getOpportunity().getEmployer().getCompanyName())
-                .applicantId(app.getApplicant().getId())
+                .applicantId(app.getApplicant().getUser().getId())
                 .applicantFirstName(app.getApplicant().getFirstName())
                 .applicantLastName(app.getApplicant().getLastName())
                 .applicantEmail(app.getApplicant().getUser().getEmail())

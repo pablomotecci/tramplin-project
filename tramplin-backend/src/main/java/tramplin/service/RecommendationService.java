@@ -41,9 +41,9 @@ public class RecommendationService {
         ApplicantProfile recommender = applicantProfileRepository.findByUserId(principal.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("Профиль соискателя не найден"));
 
-        ApplicantProfile recommended = applicantProfileRepository.findById(request.getRecommendedId())
+        ApplicantProfile recommended = applicantProfileRepository.findByUserId(request.getRecommendedId())
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Рекомендуемый соискатель не найден: " + request.getRecommendedId()));
+                        "Рекомендуемый соискатель не найден (userId: " + request.getRecommendedId() + ")"));
 
         if (recommender.getId().equals(recommended.getId())) {
             throw new BusinessException("SELF_RECOMMENDATION", "Нельзя рекомендовать самого себя");

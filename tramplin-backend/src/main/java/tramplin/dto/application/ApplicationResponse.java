@@ -28,6 +28,11 @@ public class ApplicationResponse {
     private String companyName;
 
     // Для работодателя — кто откликнулся
+    /**
+     * User.id соискателя (не путать с ApplicantProfile.id).
+     * По этому id фронт идёт в /profile/applicant/{userId}/* эндпоинты.
+     * При маппинге всегда брать через app.getApplicant().getUser().getId().
+     */
     private UUID applicantId;
     private String applicantFirstName;
     private String applicantLastName;
