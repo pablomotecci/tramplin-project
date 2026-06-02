@@ -9,6 +9,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../components/ui/Toast';
 import { getMyContacts, sendContactRequest } from '../api/contacts';
 import { SkeletonProfile } from '../components/ui/Skeleton';
+import { RecommendModal } from '../components/recommendations/RecommendModal';
 
 
 const DEGREE_LABELS: Record<Degree, string> = {
@@ -34,6 +35,7 @@ export default function ApplicantProfile() {
   const { showToast } = useToast();
   const [contactState, setContactState] = useState<'unknown' | 'none' | 'contact' | 'pending'>('unknown');
   const [contactLoading, setContactLoading] = useState(false);
+  const [recommendOpen, setRecommendOpen] = useState(false);
 
 
   // Загрузка публичного профиля
@@ -133,11 +135,18 @@ export default function ApplicantProfile() {
                 {fullName || 'Имя не указано'}
               </h1>
               {canAddContact && contactState !== 'unknown' && (
-                <div style={{ marginTop: '0.5rem' }}>
+                <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                   {contactState === 'contact' ? (
-                    <Button variant="secondary" size="sm" disabled>
-                      <span className="material-symbols-rounded" style={{ fontSize: 16, marginRight: 4, verticalAlign: 'middle' }}>check</span>В контактах
-                    </Button>
+                    <>
+                      <Button variant="secondary" size="sm" disabled>
+                        <span className="material-symbols-rounded" style={{ fontSize: 16, marginRight: 4, verticalAlign: 'middle' }}>check</span>
+                        В контактах
+                      </Button>
+                      <Button variant="primary" size="sm" onClick={() => setRecommendOpen(true)}>
+                        <span className="material-symbols-rounded" style={{ fontSize: 16, marginRight: 4, verticalAlign: 'middle' }}>recommend</span>
+                        Рекомендовать на вакансию
+                      </Button>
+                    </>
                   ) : contactState === 'pending' ? (
                     <Button variant="secondary" size="sm" disabled>Запрос отправлен</Button>
                   ) : (
@@ -285,6 +294,14 @@ export default function ApplicantProfile() {
         )}
       </div>
 
+      {id && (
+        <RecommendModal
+          isOpen={recommendOpen}
+          onClose={() => setRecommendOpen(false)}
+          recommendedUserId={id}
+          recommendedName={fullName || 'этого специалиста'}
+        />
+      )}
     </div>
   );
 }
