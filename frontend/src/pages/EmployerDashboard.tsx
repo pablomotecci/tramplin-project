@@ -23,7 +23,7 @@ import { SkeletonList } from '../components/ui/Skeleton';
 import { EmptyState } from '../components/ui/EmptyState';
 import { useToast } from '../components/ui/Toast';
 import { RecommendationsBadge } from '../components/recommendations/RecommendationsBadge';
-import { RecommendationsBlock } from '@/components/recommendations/RecommendationsBlock';
+import { RecommendationsBlock } from '../components/recommendations/RecommendationsBlock';
 
 
 
