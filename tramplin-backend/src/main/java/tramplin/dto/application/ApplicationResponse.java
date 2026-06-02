@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import tramplin.entity.enums.ApplicationStatus;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -31,4 +32,8 @@ public class ApplicationResponse {
     private String applicantFirstName;
     private String applicantLastName;
     private String applicantEmail;
+
+    // Для работодателя — рекомендации контактов соискателя на эту вакансию.
+    // Соискателю всегда пустой массив (не раскрываем его соц. граф).
+    private List<RecommendationSummary> recommendations;
 }

@@ -9,11 +9,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tramplin.dto.application.ApplicationResponse;
 import tramplin.dto.application.CreateApplicationRequest;
+import tramplin.dto.application.RecommendationSummary;
 import tramplin.dto.application.UpdateApplicationStatusRequest;
 import tramplin.entity.ApplicantProfile;
 import tramplin.entity.Application;
 import tramplin.entity.Company;
 import tramplin.entity.Opportunity;
+import tramplin.entity.Recommendation;
 import tramplin.entity.enums.ApplicationStatus;
 import tramplin.entity.enums.OpportunityStatus;
 import tramplin.exception.BusinessException;
@@ -22,9 +24,14 @@ import tramplin.repository.ApplicantProfileRepository;
 import tramplin.repository.ApplicationRepository;
 import tramplin.repository.CompanyRepository;
 import tramplin.repository.OpportunityRepository;
+import tramplin.repository.RecommendationRepository;
 import tramplin.security.UserPrincipal;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -35,6 +42,7 @@ public class ApplicationService {
     private final ApplicantProfileRepository applicantProfileRepository;
     private final OpportunityRepository opportunityRepository;
     private final CompanyRepository companyRepository;
+    private final RecommendationRepository recommendationRepository;
 
     @Transactional
     public ApplicationResponse createApplication(UserPrincipal principal, CreateApplicationRequest request) {
@@ -64,7 +72,8 @@ public class ApplicationService {
         Application saved = applicationRepository.save(application);
         log.info("Соискатель {} откликнулся на вакансию '{}'",
                 applicant.getFirstName() + " " + applicant.getLastName(), opportunity.getTitle());
-        return mapToResponse(saved);
+        // Только что созданный отклик не может иметь рекомендаций.
+        return mapToResponse(saved, Map.of());
     }
 
     @Transactional(readOnly = true)
@@ -73,8 +82,9 @@ public class ApplicationService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Профиль соискателя не найден для userId: " + principal.getUserId()));
 
+        // Соискатель смотрит свои отклики — рекомендации ему не показываем (спойлер соц. графа).
         return applicationRepository.findByApplicantId(applicant.getId(), pageable)
-                .map(this::mapToResponse);
+                .map(app -> mapToResponse(app, Map.of()));
     }
 
     @Transactional(readOnly = true)
@@ -84,12 +94,13 @@ public class ApplicationService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Профиль компании не найден для userId: " + principal.getUserId()));
 
-        if (status != null) {
-            return applicationRepository.findByOpportunityEmployerIdAndStatus(company.getId(), status, pageable)
-                    .map(this::mapToResponse);
-        }
-        return applicationRepository.findByOpportunityEmployerId(company.getId(), pageable)
-                .map(this::mapToResponse);
+        Page<Application> page = (status != null)
+                ? applicationRepository.findByOpportunityEmployerIdAndStatus(company.getId(), status, pageable)
+                : applicationRepository.findByOpportunityEmployerId(company.getId(), pageable);
+
+        // Один batch-запрос на всю страницу вместо N+1 по каждому отклику.
+        Map<AppKey, List<RecommendationSummary>> recs = loadRecommendationsFor(page.getContent());
+        return page.map(app -> mapToResponse(app, recs));
     }
 
     @Transactional(readOnly = true)
@@ -98,7 +109,16 @@ public class ApplicationService {
                 .orElseThrow(() -> new EntityNotFoundException("Отклик не найден: " + id));
 
         checkAccess(principal, application);
-        return mapToResponse(application);
+
+        // Рекомендации видит только работодатель, принимающий решение по отклику.
+        // Соискателю их не показываем, чтобы не раскрывать факт рекомендации,
+        // который рекомендующий мог хотеть оставить непубличным.
+        boolean isEmployer = application.getOpportunity().getEmployer().getUser().getId()
+                .equals(principal.getUserId());
+        Map<AppKey, List<RecommendationSummary>> recs = isEmployer
+                ? loadRecommendationsFor(List.of(application))
+                : Map.of();
+        return mapToResponse(application, recs);
     }
 
     @Transactional
@@ -120,7 +140,8 @@ public class ApplicationService {
         Application saved = applicationRepository.save(application);
         log.info("Статус отклика {} изменён на {} компанией {}",
                 id, request.getStatus(), company.getCompanyName());
-        return mapToResponse(saved);
+        // Меняет статус всегда работодатель — показываем рекомендации.
+        return mapToResponse(saved, loadRecommendationsFor(List.of(saved)));
     }
 
     private void validateStatusTransition(ApplicationStatus current, ApplicationStatus next) {
@@ -143,7 +164,52 @@ public class ApplicationService {
         }
     }
 
-    private ApplicationResponse mapToResponse(Application app) {
+    /**
+     * Ключ для группировки рекомендаций по точной паре (соискатель, вакансия).
+     * applicantId == Application.applicant.id == Recommendation.recommended.id.
+     */
+    private record AppKey(UUID applicantId, UUID opportunityId) {}
+
+    /**
+     * Batch-загрузка рекомендаций для всей страницы откликов: 1 SQL-запрос
+     * вместо N+1. Возвращает Map по точным парам (applicantId, opportunityId).
+     */
+    private Map<AppKey, List<RecommendationSummary>> loadRecommendationsFor(List<Application> apps) {
+        if (apps.isEmpty()) {
+            return Map.of();
+        }
+
+        Set<UUID> applicantIds = apps.stream()
+                .map(a -> a.getApplicant().getId())
+                .collect(Collectors.toSet());
+        Set<UUID> opportunityIds = apps.stream()
+                .map(a -> a.getOpportunity().getId())
+                .collect(Collectors.toSet());
+
+        List<Recommendation> all = recommendationRepository.findForApplicationBatch(applicantIds, opportunityIds);
+
+        // Группируем по точным парам (а не по декартову произведению из запроса).
+        return all.stream()
+                .collect(Collectors.groupingBy(
+                        r -> new AppKey(r.getRecommended().getId(), r.getOpportunity().getId()),
+                        Collectors.mapping(this::toSummary, Collectors.toList())
+                ));
+    }
+
+    private RecommendationSummary toSummary(Recommendation r) {
+        ApplicantProfile recommender = r.getRecommender();
+        return RecommendationSummary.builder()
+                .recommenderUserId(recommender.getUser().getId())
+                .recommenderName(recommender.getFirstName() + " " + recommender.getLastName())
+                .recommenderAvatarUrl(recommender.getAvatarUrl())
+                .message(r.getMessage())
+                .createdAt(r.getCreatedAt())
+                .build();
+    }
+
+    private ApplicationResponse mapToResponse(Application app,
+                                             Map<AppKey, List<RecommendationSummary>> recommendations) {
+        AppKey key = new AppKey(app.getApplicant().getId(), app.getOpportunity().getId());
         return ApplicationResponse.builder()
                 .id(app.getId())
                 .status(app.getStatus())
@@ -157,6 +223,8 @@ public class ApplicationService {
                 .applicantFirstName(app.getApplicant().getFirstName())
                 .applicantLastName(app.getApplicant().getLastName())
                 .applicantEmail(app.getApplicant().getUser().getEmail())
+                // Всегда массив (возможно пустой) — стандарт наших DTO, фронту удобнее.
+                .recommendations(recommendations.getOrDefault(key, List.of()))
                 .build();
     }
 }
