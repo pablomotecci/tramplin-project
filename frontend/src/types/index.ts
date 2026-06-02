@@ -324,6 +324,21 @@ export interface RecommendationSummary {
 
 
 
+export interface MatchedTag {
+  tagName: string;
+  category: string;
+  matchType: string;
+}
+
+export interface ApplicationScoreSummary {
+  scorePercent: number;
+  matchedTags: MatchedTag[];
+  totalRequiredTags: number;
+}
+
+
+
+
 
 
 export interface ApplicationResponse {
@@ -344,6 +359,7 @@ export interface ApplicationResponse {
   applicantLastName:string;
   applicantEmail: string;
   recommendations: RecommendationSummary[];
+  scoreSummary: ApplicationScoreSummary | null;
 }
 
 

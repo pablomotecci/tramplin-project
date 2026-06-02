@@ -24,6 +24,8 @@ import { EmptyState } from '../components/ui/EmptyState';
 import { useToast } from '../components/ui/Toast';
 import { RecommendationsBadge } from '../components/recommendations/RecommendationsBadge';
 import { RecommendationsBlock } from '../components/recommendations/RecommendationsBlock';
+import { ScoreBadge } from '../components/score/ScoreBadge';
+import { ScoreBlock } from '../components/score/ScoreBlock';
 
 
 
@@ -906,12 +908,20 @@ export function EmployerDashboard() {
                     >
                       {app.opportunityTitle}
                     </span>
-                    {app.recommendations.length > 0 && (
-                      <RecommendationsBadge count={app.recommendations.length} />
-                    )}
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
+                      {app.scoreSummary && (
+                        <ScoreBadge percent={app.scoreSummary.scorePercent} />
+                      )}
+                      {app.recommendations.length > 0 && (
+                        <RecommendationsBadge count={app.recommendations.length} />
+                      )}
+                    </div>
                   </div>
                   {app.coverLetter && (
                     <p className={styles.appCoverLetter}>{app.coverLetter}</p>
+                  )}
+                  {app.scoreSummary && (
+                    <ScoreBlock summary={app.scoreSummary} />
                   )}
                   {app.recommendations.length > 0 && (
                     <RecommendationsBlock recommendations={app.recommendations} />
