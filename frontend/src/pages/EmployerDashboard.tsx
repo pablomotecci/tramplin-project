@@ -22,6 +22,8 @@ import { FileUpload } from '../components/ui/FileUpload';
 import { SkeletonList } from '../components/ui/Skeleton';
 import { EmptyState } from '../components/ui/EmptyState';
 import { useToast } from '../components/ui/Toast';
+import { RecommendationsBadge } from '../components/recommendations/RecommendationsBadge';
+import { RecommendationsBlock } from '@/components/recommendations/RecommendationsBlock';
 
 
 
@@ -116,7 +118,7 @@ export function EmployerDashboard() {
   const [updatingAppId, setUpdatingAppId] = useState<string | null>(null);
 
   // Рекомендации по вакансиям
-  const [recsMap, setRecsMap] = useState<Record<string, RecommendationResponse[]>>({});
+ //const [recsMap, setRecsMap] = useState<Record<string, RecommendationResponse[]>>({});
   // Скоринг — лучшие кандидаты по вакансиям
   const [candidatesMap, setCandidatesMap] = useState<Record<string, ApplicantScore[]>>({});
 
@@ -209,7 +211,7 @@ export function EmployerDashboard() {
           } catch { /* skip */ }
         })
       );
-      setRecsMap(rMap);
+      //setRecsMap(rMap);
       setCandidatesMap(cMap);
     }
     loadRecsAndCandidates();
@@ -852,7 +854,7 @@ export function EmployerDashboard() {
                           borderRadius: '999px', background: 'rgba(52,211,153,0.15)', color: '#059669',
                           flexShrink: 0,
                         }}>
-                          {Math.round(c.score)}% совпадение
+                          {Math.round(c.score * 100)}% совпадение
                         </span>
                       </div>
                     ))}
@@ -904,19 +906,15 @@ export function EmployerDashboard() {
                     >
                       {app.opportunityTitle}
                     </span>
-                    {recsMap[app.opportunityId]?.some(r => r.recommendedName.includes(app.applicantFirstName)) && (
-                      <span style={{
-                        fontSize: '0.7rem', fontWeight: 600, padding: '0.1rem 0.4rem',
-                        borderRadius: '999px', background: 'rgba(52,211,153,0.15)', color: '#059669',
-                        display: 'inline-flex', alignItems: 'center', gap: '3px', width: 'fit-content',
-                      }}>
-                        <span className="material-symbols-rounded" style={{ fontSize: '12px' }}>recommend</span>
-                        Рекомендован
-                      </span>
+                    {app.recommendations.length > 0 && (
+                      <RecommendationsBadge count={app.recommendations.length} />
                     )}
                   </div>
                   {app.coverLetter && (
                     <p className={styles.appCoverLetter}>{app.coverLetter}</p>
+                  )}
+                  {app.recommendations.length > 0 && (
+                    <RecommendationsBlock recommendations={app.recommendations} />
                   )}
                   <div className={styles.appActions}>
                     <span className={styles.appDate}>

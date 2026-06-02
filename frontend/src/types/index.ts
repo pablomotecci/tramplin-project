@@ -310,6 +310,22 @@ export enum ApplicationStatus {
 }
 
 
+
+
+
+export interface RecommendationSummary {
+  recommenderUserId: string;
+  recommenderName: string;
+  recommenderAvatarUrl: string | null;
+  message: string | null;
+  createdAt: string;
+}
+
+
+
+
+
+
 export interface ApplicationResponse {
   id: string;
   status: ApplicationStatus;
@@ -327,6 +343,7 @@ export interface ApplicationResponse {
   applicantFirstName: string;
   applicantLastName:string;
   applicantEmail: string;
+  recommendations: RecommendationSummary[];
 }
 
 
