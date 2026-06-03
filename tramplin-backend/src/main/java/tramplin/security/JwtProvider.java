@@ -4,16 +4,28 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.UUID;
 
 @Slf4j
 @Component
 public class JwtProvider {
+
+    /**
+     * Небезопасный дефолт из application.yml — допустим только для локальной разработки.
+     * На проде использование этого ключа означает, что токены подписываются публично
+     * известным секретом из репозитория, поэтому старт под prod-профилем запрещён.
+     */
+    static final String INSECURE_DEFAULT_SECRET = "my-super-secret-key-for-jwt-256-bits-long!!";
+
+    /** HS256 требует ключ не короче 256 бит = 32 байт. */
+    private static final int MIN_SECRET_LENGTH_BYTES = 32;
 
     private final SecretKey secretKey;
     private final long accessExpirationMs;
@@ -22,8 +34,27 @@ public class JwtProvider {
     public JwtProvider(
             @Value("${app.jwt.secret}") String secret,
             @Value("${app.jwt.access-expiration-ms}") long accessExpirationMs,
-            @Value("${app.jwt.refresh-expiration-ms}") long refreshExpirationMs
+            @Value("${app.jwt.refresh-expiration-ms}") long refreshExpirationMs,
+            Environment environment
     ) {
+        boolean prod = Arrays.asList(environment.getActiveProfiles()).contains("prod");
+        if (prod) {
+            if (secret == null || secret.isBlank()) {
+                throw new IllegalStateException(
+                        "JWT_SECRET не задан. На проде секрет обязателен — задайте переменную окружения JWT_SECRET (>= "
+                                + MIN_SECRET_LENGTH_BYTES + " символов).");
+            }
+            if (INSECURE_DEFAULT_SECRET.equals(secret)) {
+                throw new IllegalStateException(
+                        "JWT_SECRET равен дефолтному ключу из application.yml. Этот ключ публично известен — "
+                                + "на проде задайте собственный JWT_SECRET.");
+            }
+            if (secret.getBytes(StandardCharsets.UTF_8).length < MIN_SECRET_LENGTH_BYTES) {
+                throw new IllegalStateException(
+                        "JWT_SECRET слишком короткий для HS256: нужно минимум "
+                                + MIN_SECRET_LENGTH_BYTES + " байт.");
+            }
+        }
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.accessExpirationMs = accessExpirationMs;
         this.refreshExpirationMs = refreshExpirationMs;

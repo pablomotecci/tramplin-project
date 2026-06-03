@@ -14,6 +14,7 @@ import tramplin.entity.Company;
 import tramplin.entity.User;
 import tramplin.entity.VerificationRequest;
 import tramplin.entity.enums.AccountStatus;
+import tramplin.entity.enums.NotificationType;
 import tramplin.entity.enums.VerificationRequestStatus;
 import tramplin.entity.enums.VerificationStatus;
 import tramplin.exception.BusinessException;
@@ -35,6 +36,7 @@ public class VerificationService {
     private final VerificationRequestRepository verificationRequestRepository;
     private final CompanyRepository companyRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     private static final Set<String> PUBLIC_EMAIL_DOMAINS = Set.of(
             "gmail.com", "mail.ru", "yandex.ru", "ya.ru", "inbox.ru",
@@ -65,13 +67,9 @@ public class VerificationService {
                 .corporateEmail(dto.getCorporateEmail())
                 .build();
 
-        if (!validateInn(dto.getInn())) {
-            request.setStatus(VerificationRequestStatus.REJECTED);
-            request.setRejectionReason("ИНН не прошёл валидацию: должен содержать 10 или 12 цифр");
-            VerificationRequest saved = verificationRequestRepository.save(request);
-            log.warn("Заявка на верификацию отклонена — невалидный ИНН: {}", dto.getInn());
-            return mapToResponse(saved);
-        }
+        // Структурная корректность ИНН (цифры + длина + контрольная сумма) гарантирована
+        // аннотацией @Inn на CreateVerificationRequestDto — битый ИНН отбивается как 400
+        // до входа в сервис. Здесь ИНН по построению валиден.
         request.setStatus(VerificationRequestStatus.INN_VERIFIED);
 
         if (!validateCorporateEmail(dto.getCorporateEmail(), dto.getCompanyDomain())) {
@@ -154,6 +152,10 @@ public class VerificationService {
 
         log.info("Заявка {} одобрена куратором {}. Компания '{}' верифицирована",
                 requestId, curator.getUserId(), company.getCompanyName());
+        notificationService.send(
+                employerUser.getEmail(),
+                NotificationType.VERIFICATION_APPROVED,
+                "Ваша компания «" + company.getCompanyName() + "» успешно верифицирована");
         return mapToResponse(request);
     }
 
@@ -184,12 +186,11 @@ public class VerificationService {
 
         log.info("Заявка {} отклонена куратором {}. Причина: {}",
                 requestId, curator.getUserId(), dto.getRejectionReason());
+        notificationService.send(
+                company.getUser().getEmail(),
+                NotificationType.VERIFICATION_REJECTED,
+                "Заявка на верификацию отклонена. Причина: " + dto.getRejectionReason());
         return mapToResponse(request);
-    }
-
-    private boolean validateInn(String inn) {
-        if (inn == null) return false;
-        return (inn.length() == 10 || inn.length() == 12) && inn.chars().allMatch(Character::isDigit);
     }
 
     private boolean validateCorporateEmail(String email, String companyDomain) {

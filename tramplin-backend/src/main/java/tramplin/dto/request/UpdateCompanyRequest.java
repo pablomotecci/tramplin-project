@@ -2,11 +2,11 @@ package tramplin.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import tramplin.validation.Inn;
 
 @Data
 @Builder
@@ -21,7 +21,7 @@ public class UpdateCompanyRequest {
 
     private String industry;
 
-    @Size(min = 10, max = 12)
+    @Inn
     private String inn;
 
     private String websiteUrl;

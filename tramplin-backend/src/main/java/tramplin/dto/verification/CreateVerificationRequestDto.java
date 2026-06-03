@@ -2,11 +2,11 @@ package tramplin.dto.verification;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import tramplin.validation.Inn;
 
 @Data
 @Builder
@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class CreateVerificationRequestDto {
 
     @NotBlank
-    @Size(min = 10, max = 12)
+    @Inn
     private String inn;
 
     @NotBlank

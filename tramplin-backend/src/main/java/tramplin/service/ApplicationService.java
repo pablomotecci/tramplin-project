@@ -18,6 +18,7 @@ import tramplin.entity.Company;
 import tramplin.entity.Opportunity;
 import tramplin.entity.Recommendation;
 import tramplin.entity.enums.ApplicationStatus;
+import tramplin.entity.enums.NotificationType;
 import tramplin.entity.enums.OpportunityStatus;
 import tramplin.exception.BusinessException;
 import tramplin.exception.ConflictException;
@@ -45,6 +46,7 @@ public class ApplicationService {
     private final CompanyRepository companyRepository;
     private final RecommendationRepository recommendationRepository;
     private final ScoringService scoringService;
+    private final NotificationService notificationService;
 
     @Transactional
     public ApplicationResponse createApplication(UserPrincipal principal, CreateApplicationRequest request) {
@@ -74,6 +76,10 @@ public class ApplicationService {
         Application saved = applicationRepository.save(application);
         log.info("Соискатель {} откликнулся на вакансию '{}'",
                 applicant.getFirstName() + " " + applicant.getLastName(), opportunity.getTitle());
+        notificationService.send(
+                opportunity.getEmployer().getUser().getEmail(),
+                NotificationType.APPLICATION_RECEIVED,
+                "Новый отклик на вакансию «" + opportunity.getTitle() + "»");
         // Только что созданный отклик: ни рекомендаций, ни score для работодателя ещё нет.
         return mapToResponse(saved, AppEnrichment.empty());
     }
@@ -143,6 +149,10 @@ public class ApplicationService {
         Application saved = applicationRepository.save(application);
         log.info("Статус отклика {} изменён на {} компанией {}",
                 id, request.getStatus(), company.getCompanyName());
+        notificationService.send(
+                saved.getApplicant().getUser().getEmail(),
+                NotificationType.APPLICATION_STATUS_CHANGED,
+                "Статус вашего отклика на «" + saved.getOpportunity().getTitle() + "» изменён на " + saved.getStatus());
         // Меняет статус всегда работодатель — показываем рекомендации и score.
         return mapToResponse(saved, enrichmentFor(List.of(saved)));
     }

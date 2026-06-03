@@ -62,7 +62,8 @@ public class ScoringService {
     }
 
     @Transactional(readOnly = true)
-    public List<ApplicantScoreDto> calculateScoresForOpportunity(UUID opportunityId, UUID requesterId, String requesterRole) {
+    public List<ApplicantScoreDto> calculateScoresForOpportunity(UUID opportunityId, UUID requesterId,
+                                                                 String requesterRole, int page, int size) {
         Opportunity opportunity = opportunityRepository.findByIdWithTagsAndEmployer(opportunityId)
                 .orElseThrow(() -> new EntityNotFoundException("Возможность не найдена: " + opportunityId));
 
@@ -74,7 +75,18 @@ public class ScoringService {
 
         Set<Tag> opportunityTags = opportunity.getTags();
 
-        return applicantProfileRepository.findAllWithTagsAndUser().stream()
+        // Пагинация здесь in-memory, а не через Pageable в запросе — и это осознанно:
+        //  1. Это глобальный топ кандидатов по совместимости. score вычисляется в Java
+        //     (его нет колонкой в БД), поэтому отсортировать и взять топ-N на стороне БД
+        //     невозможно — пул приходится оценить целиком.
+        //  2. findAllWithTagsAndUser делает collection fetch (JOIN FETCH ap.tags). Pageable
+        //     поверх collection fetch даёт HHH000104: Hibernate молча тянет все строки и
+        //     пагинирует в памяти — то есть иллюзию БД-пагинации без выигрыша.
+        // Поэтому считаем весь пул, сортируем, и режем срез в памяти — это ограничивает
+        // payload ответа (не гоняем сотни кандидатов в одном JSON). Продакшен-next-step для
+        // настоящего масштабирования нагрузки — денормализация score в колонку или вынос
+        // ранжирования в поисковый движок.
+        List<ApplicantScoreDto> sorted = applicantProfileRepository.findAllWithTagsAndUser().stream()
                 .map(profile -> {
                     double score = computeScore(profile.getTags(), opportunityTags);
                     return ApplicantScoreDto.builder()
@@ -85,6 +97,14 @@ public class ScoringService {
                 })
                 .sorted(Comparator.comparingDouble(ApplicantScoreDto::getScore).reversed())
                 .toList();
+
+        // Защита от заданных вручную query-параметров: отрицательный page дал бы
+        // отрицательный from → subList(-N, …) бросает IndexOutOfBoundsException (500).
+        int safePage = Math.max(0, page);
+        int safeSize = Math.max(1, size);
+        int from = Math.min(safePage * safeSize, sorted.size());
+        int to = Math.min(from + safeSize, sorted.size());
+        return sorted.subList(from, to);
     }
 
     @Transactional(readOnly = true)

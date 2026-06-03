@@ -29,12 +29,17 @@ public class ScoringController {
 
     @GetMapping("/opportunity/{id}/candidates")
     @PreAuthorize("hasAnyRole('EMPLOYER', 'CURATOR', 'ADMIN')")
-    @Operation(summary = "Ранжирование кандидатов", description = "Список соискателей, отсортированный по совместимости с возможностью")
+    @Operation(summary = "Ранжирование кандидатов",
+               description = "Список соискателей, отсортированный по совместимости с возможностью (по убыванию score). "
+                       + "Пагинация: page (с 0, по умолчанию 0) и size (по умолчанию 20) ограничивают размер ответа.")
     public ResponseEntity<ApiResponse<List<ApplicantScoreDto>>> getCandidatesForOpportunity(
             @PathVariable UUID id,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
             @AuthenticationPrincipal UserPrincipal principal
     ) {
-        List<ApplicantScoreDto> scores = scoringService.calculateScoresForOpportunity(id, principal.getUserId(), principal.getRole());
+        List<ApplicantScoreDto> scores = scoringService.calculateScoresForOpportunity(
+                id, principal.getUserId(), principal.getRole(), page, size);
         return ResponseEntity.ok(ApiResponse.ok(scores));
     }
 
