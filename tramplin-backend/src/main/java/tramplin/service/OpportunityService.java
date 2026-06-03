@@ -248,7 +248,7 @@ public class OpportunityService {
                 .and(OpportunitySpecification.hasType(type))
                 .and(OpportunitySpecification.hasWorkFormat(workFormat))
                 .and(OpportunitySpecification.hasCity(city))
-                .and(OpportunitySpecification.hasSalaryMin(salaryMin))
+                .and(OpportunitySpecification.salaryContains(salaryMin))
                 .and(OpportunitySpecification.hasTags(tagIds))
                 .and(OpportunitySpecification.searchByText(search));
 

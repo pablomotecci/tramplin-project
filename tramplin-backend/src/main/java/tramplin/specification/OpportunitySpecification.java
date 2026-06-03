@@ -34,10 +34,24 @@ public class OpportunitySpecification {
                 : (root, query, cb) -> cb.equal(root.get("city"), city);
     }
 
-    public static Specification<Opportunity> hasSalaryMin(Long salaryMin) {
-        return salaryMin == null
+    /**
+     * Вхождение искомой суммы S в вилку вакансии [salaryMin, salaryMax] включительно.
+     * Открытые вилки трактуются как полуоткрытые интервалы: null-граница = ±∞.
+     *   (salaryMin IS NULL OR salaryMin <= S) AND (salaryMax IS NULL OR salaryMax >= S)
+     * Так вакансия «от 100k» (salaryMax не задан) корректно находится при поиске 250k,
+     * потому что 250k ∈ [100k, +∞). Вакансия с обеими null-границами подходит под любой S
+     * (зарплата не указана → не прячем). Фильтрация на уровне SQL, совместима с пагинацией.
+     */
+    public static Specification<Opportunity> salaryContains(Long salary) {
+        return salary == null
                 ? (root, query, cb) -> cb.conjunction()
-                : (root, query, cb) -> cb.greaterThanOrEqualTo(root.get("salaryMax"), salaryMin);
+                : (root, query, cb) -> cb.and(
+                        cb.or(
+                                cb.isNull(root.get("salaryMin")),
+                                cb.lessThanOrEqualTo(root.get("salaryMin"), salary)),
+                        cb.or(
+                                cb.isNull(root.get("salaryMax")),
+                                cb.greaterThanOrEqualTo(root.get("salaryMax"), salary)));
     }
 
     public static Specification<Opportunity> hasTags(List<UUID> tagIds) {

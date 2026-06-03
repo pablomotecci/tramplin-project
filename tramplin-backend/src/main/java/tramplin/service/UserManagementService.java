@@ -16,10 +16,15 @@ import tramplin.entity.enums.AccountStatus;
 import tramplin.entity.enums.Role;
 import tramplin.exception.BusinessException;
 import tramplin.exception.ConflictException;
+import tramplin.repository.CompanyRepository;
+import tramplin.repository.CompanyRepository.CompanyIdView;
 import tramplin.repository.UserRepository;
 
 import java.security.SecureRandom;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -32,29 +37,26 @@ public class UserManagementService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final CompanyRepository companyRepository;
 
     @Transactional(readOnly = true)
     public Page<UserManagementResponseDto> getAllUsers(Pageable pageable) {
-        return userRepository.findAll(pageable)
-                .map(this::mapToResponse);
+        return mapPage(userRepository.findAll(pageable));
     }
 
     @Transactional(readOnly = true)
     public Page<UserManagementResponseDto> getUsersByRole(Role role, Pageable pageable) {
-        return userRepository.findByRole(role, pageable)
-                .map(this::mapToResponse);
+        return mapPage(userRepository.findByRole(role, pageable));
     }
 
     @Transactional(readOnly = true)
     public Page<UserManagementResponseDto> getUsersByStatus(AccountStatus status, Pageable pageable) {
-        return userRepository.findByStatus(status, pageable)
-                .map(this::mapToResponse);
+        return mapPage(userRepository.findByStatus(status, pageable));
     }
 
     @Transactional(readOnly = true)
     public Page<UserManagementResponseDto> getUsersByRoleAndStatus(Role role, AccountStatus status, Pageable pageable) {
-        return userRepository.findByRoleAndStatus(role, status, pageable)
-                .map(this::mapToResponse);
+        return mapPage(userRepository.findByRoleAndStatus(role, status, pageable));
     }
 
     @Transactional
@@ -121,7 +123,30 @@ public class UserManagementService {
         return sb.toString();
     }
 
+    /**
+     * Маппинг страницы пользователей с batch-подтягиванием companyId для работодателей:
+     * собираем userId работодателей текущей страницы → один IN-запрос → Map → маппинг.
+     * O(1) запрос вместо O(N), без N+1.
+     */
+    private Page<UserManagementResponseDto> mapPage(Page<User> page) {
+        List<UUID> employerUserIds = page.getContent().stream()
+                .filter(u -> u.getRole() == Role.EMPLOYER)
+                .map(User::getId)
+                .toList();
+
+        Map<UUID, UUID> companyIdByUserId = employerUserIds.isEmpty()
+                ? Map.of()
+                : companyRepository.findCompanyIdsByUserIds(employerUserIds).stream()
+                        .collect(Collectors.toMap(CompanyIdView::getUserId, CompanyIdView::getCompanyId));
+
+        return page.map(u -> mapToResponse(u, companyIdByUserId.get(u.getId())));
+    }
+
     private UserManagementResponseDto mapToResponse(User user) {
+        return mapToResponse(user, null);
+    }
+
+    private UserManagementResponseDto mapToResponse(User user, UUID employerCompanyId) {
         return UserManagementResponseDto.builder()
                 .id(user.getId())
                 .email(user.getEmail())
@@ -129,6 +154,7 @@ public class UserManagementService {
                 .role(user.getRole())
                 .status(user.getStatus())
                 .createdAt(user.getCreatedAt())
+                .employerCompanyId(employerCompanyId)
                 .build();
     }
 }

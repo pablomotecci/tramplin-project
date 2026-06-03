@@ -22,4 +22,5 @@ public class UserManagementResponseDto {
     private Role role;
     private AccountStatus status;
     private LocalDateTime createdAt;
+    private UUID employerCompanyId; // заполняется только для роли EMPLOYER, иначе null
 }
