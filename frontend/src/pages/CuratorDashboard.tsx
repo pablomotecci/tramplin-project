@@ -2,6 +2,7 @@
 
 
 import { useState, useEffect, useCallback, type FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -251,8 +252,15 @@ function VerificationTab() {
             <div key={req.id} className={styles.card} style={{ padding: '1.25rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 600, color: 'var(--color-text)' }}>
-                    {req.companyName || 'Без названия'}
+                  <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 600 }}>
+                    <Link
+                      to={`/company/${req.employerId}`}
+                      style={{ color: 'var(--color-text)', textDecoration: 'none' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-accent)'; e.currentTarget.style.textDecoration = 'underline'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-text)'; e.currentTarget.style.textDecoration = 'none'; }}
+                    >
+                      {req.companyName || 'Без названия'}
+                    </Link>
                   </h3>
                   <span style={{
                     display: 'inline-block', marginTop: '0.3rem',
@@ -488,9 +496,26 @@ function ModerationTab() {
                     }}>
                       {opp.status === 'ACTIVE' ? 'Активна' : 'Скрыта'}
                     </span>
-                    <span className={styles.oppType}>{opp.companyName}</span>
+                    <Link
+                      to={`/company/${opp.employerId}`}
+                      className={styles.oppType}
+                      style={{ textDecoration: 'none', color: 'inherit' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-accent)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.color = ''; }}
+                    >
+                      {opp.companyName}
+                    </Link>
                   </div>
-                  <p className={styles.oppTitle}>{opp.title}</p>
+                  <p className={styles.oppTitle}>
+                    <Link
+                      to={`/opportunities/${opp.id}`}
+                      style={{ color: 'inherit', textDecoration: 'none' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-accent)'; e.currentTarget.style.textDecoration = 'underline'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.color = ''; e.currentTarget.style.textDecoration = 'none'; }}
+                    >
+                      {opp.title}
+                    </Link>
+                  </p>
                   <div className={styles.oppMeta}>
                     <span>{opp.city}</span>
                     {opp.tags && opp.tags.length > 0 && <span>{opp.tags.slice(0, 3).join(', ')}</span>}
@@ -838,7 +863,31 @@ function UsersTab() {
             {users.map(usr => (
               <div key={usr.id} className={styles.appRow}>
                 <div className={styles.appInfo}>
-                  <span className={styles.appTitle} style={{ cursor: 'default' }}>{usr.displayName || '(без имени)'}</span>
+                  {usr.role === 'APPLICANT' ? (
+                    <Link
+                      to={`/applicant/${usr.id}`}
+                      className={styles.appTitle}
+                      style={{ textDecoration: 'none', color: 'inherit' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-accent)'; e.currentTarget.style.textDecoration = 'underline'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.color = ''; e.currentTarget.style.textDecoration = 'none'; }}
+                    >
+                      {usr.displayName || '(без имени)'}
+                    </Link>
+                  ) : usr.role === 'EMPLOYER' && usr.employerCompanyId ? (
+                    <Link
+                      to={`/company/${usr.employerCompanyId}`}
+                      className={styles.appTitle}
+                      style={{ textDecoration: 'none', color: 'inherit' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-accent)'; e.currentTarget.style.textDecoration = 'underline'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.color = ''; e.currentTarget.style.textDecoration = 'none'; }}
+                    >
+                      {usr.displayName || '(без имени)'}
+                    </Link>
+                  ) : (
+                    <span className={styles.appTitle} style={{ cursor: 'default' }}>
+                      {usr.displayName || '(без имени)'}
+                    </span>
+                  )}
                   <span className={styles.appCompany}>{usr.email} · {ROLE_LABELS[usr.role]} · Рег: {formatDate(usr.createdAt)}</span>
                 </div>
                 <span className={styles.appStatus} style={{

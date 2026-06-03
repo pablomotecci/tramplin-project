@@ -419,8 +419,8 @@ export interface UserManagementResponse {
   role: UserRole;
   status: AccountStatus;
   createdAt: string;
+  employerCompanyId: string | null;
 }
-
 
 export interface CreateCuratorRequest {
   email: string;
