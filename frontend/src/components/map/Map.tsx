@@ -1,17 +1,12 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { YMaps, Map, Clusterer, Placemark } from '@pbe/react-yandex-maps';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import { YMaps, Map as YMap, Clusterer, Placemark } from '@pbe/react-yandex-maps';
 import { getOpportunitiesForMap } from '../../api/opportunities';
 import type { OpportunityMapCard } from '../../types';
 import styles from './Map.module.css';
 import { useFavorites } from '../../hooks/useFavorites';
 import { escapeHtml, safeUrl } from '../../utils/html';
 
-/*
-  Компонент Яндекс карты с маркерами вакансий
-  При клике на маркер — показывает модульную карточку.
-*/
 
-// Цвета маркеров по типу возможности (из плана 04)
 const MARKER_PRESETS: Record<string, string> = {
   VACANCY: 'islands#blueCircleDotIcon',
   INTERNSHIP: 'islands#blueCircleDotIcon',
@@ -45,16 +40,45 @@ function formatSalary(min: number | null, max: number | null): string {
   return 'По договорённости';
 }
 
-// Формируем HTML для маркера (модульная карточка при клике на маркер)
-function buildBalloonContent(opp: OpportunityMapCard): string {
-  const typeBg = opp.type === 'VACANCY' ? '#dbeafe' : opp.type === 'INTERNSHIP' ? '#fff3ed' : opp.type === 'EVENT' ? '#d1fae5' : '#ede9fe';
-  const typeColor = opp.type === 'VACANCY' ? '#1d4ed8' : opp.type === 'INTERNSHIP' ? '#E8622C' : opp.type === 'EVENT' ? '#059669' : '#7c3aed';
+function typeColors(type: string): { bg: string; color: string } {
+  if (type === 'VACANCY') return { bg: '#dbeafe', color: '#1d4ed8' };
+  if (type === 'INTERNSHIP') return { bg: '#fff3ed', color: '#E8622C' };
+  if (type === 'EVENT') return { bg: '#d1fae5', color: '#059669' };
+  return { bg: '#ede9fe', color: '#7c3aed' };
+}
 
+// Русская плюрализация: 1 вакансия, 2 вакансии, 5 вакансий
+function pluralizeVacancies(n: number): string {
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return 'вакансия';
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 'вакансии';
+  return 'вакансий';
+}
+
+function favoriteButton(oppId: string, isFav: boolean): string {
+  return `
+    <button
+      type="button"
+      class="tramplin-balloon__fav-btn${isFav ? ' tramplin-balloon__fav-btn--active' : ''}"
+      data-tramplin-action="toggle-fav"
+      data-tramplin-opp-id="${escapeHtml(oppId)}"
+      title="${isFav ? 'Убрать из избранного' : 'Добавить в избранное'}"
+    >
+      <span class="material-symbols-rounded" style="font-size:15px;">favorite</span>
+      ${isFav ? 'В избранном' : 'В избранное'}
+    </button>
+  `;
+}
+
+// Балун для одиночной вакансии (старый формат + индикатор избранного)
+function buildBalloonContent(opp: OpportunityMapCard, isFav: boolean): string {
+  const { bg: typeBg, color: typeColor } = typeColors(opp.type);
   const logoUrl = safeUrl(opp.logoUrl);
+  const favBtn = favoriteButton(opp.id, isFav);
 
   return `
     <div class="tramplin-balloon">
-      <!-- Шапка: тип + формат -->
       <div class="tramplin-balloon__header">
         <span class="tramplin-balloon__type" style="background:${typeBg};color:${typeColor};">
           ${escapeHtml(TYPE_LABELS[opp.type] || opp.type)}
@@ -63,12 +87,11 @@ function buildBalloonContent(opp: OpportunityMapCard): string {
           <span class="material-symbols-rounded" style="font-size:14px;">${escapeHtml(FORMAT_ICONS[opp.workFormat] || 'work')}</span>
           ${escapeHtml(FORMAT_LABELS[opp.workFormat] || opp.workFormat)}
         </span>
+        ${favBtn}
       </div>
 
-      <!-- Название -->
       <div class="tramplin-balloon__title">${escapeHtml(opp.title)}</div>
 
-      <!-- Компания -->
       <div class="tramplin-balloon__company">
         ${logoUrl
           ? `<img src="${logoUrl}" alt="" class="tramplin-balloon__logo" />`
@@ -77,14 +100,12 @@ function buildBalloonContent(opp: OpportunityMapCard): string {
         <span>${escapeHtml(opp.companyName)}</span>
       </div>
 
-      <!-- Теги -->
       ${opp.tags && opp.tags.length > 0 ? `
         <div class="tramplin-balloon__tags">
           ${opp.tags.slice(0, 4).map(tag => `<span class="tramplin-balloon__tag">${escapeHtml(tag)}</span>`).join('')}
         </div>
       ` : ''}
 
-      <!-- Подвал: город + зарплата -->
       <div class="tramplin-balloon__footer">
         <span class="tramplin-balloon__city">
           <span class="material-symbols-rounded" style="font-size:14px;">location_on</span>
@@ -93,11 +114,60 @@ function buildBalloonContent(opp: OpportunityMapCard): string {
         <span class="tramplin-balloon__salary">${formatSalary(opp.salaryMin, opp.salaryMax)}</span>
       </div>
 
-      <!-- Кнопка -->
       <a href="/opportunities/${encodeURIComponent(opp.id)}" class="tramplin-balloon__link">
         Подробнее
         <span class="material-symbols-rounded" style="font-size:16px;">arrow_forward</span>
       </a>
+    </div>
+  `;
+}
+
+
+function buildMultiBalloonContent(group: OpportunityMapCard[], favIds: Set<string>): string {
+  const companies = new Set(group.map(o => o.companyName));
+  const header = companies.size === 1
+    ? `${group.length} ${pluralizeVacancies(group.length)} · ${escapeHtml(group[0].companyName)}`
+    : `${group.length} ${pluralizeVacancies(group.length)} по этому адресу`;
+
+  const sorted = [...group].sort((a, b) => {
+    const aFav = favIds.has(a.id) ? 1 : 0;
+    const bFav = favIds.has(b.id) ? 1 : 0;
+    return bFav - aFav;
+  });
+
+  const cards = sorted.map(opp => {
+    const isFav = favIds.has(opp.id);
+    const { bg: typeBg, color: typeColor } = typeColors(opp.type);
+
+    return `
+      <div class="tramplin-balloon-multi__card${isFav ? ' tramplin-balloon-multi__card--fav' : ''}">
+        <div class="tramplin-balloon-multi__card-row">
+          <span class="tramplin-balloon__type" style="background:${typeBg};color:${typeColor};">
+            ${escapeHtml(TYPE_LABELS[opp.type] || opp.type)}
+          </span>
+          ${favoriteButton(opp.id, isFav)}
+        </div>
+        <div class="tramplin-balloon-multi__card-title">${escapeHtml(opp.title)}</div>
+        <div class="tramplin-balloon-multi__card-meta">
+          <span>${formatSalary(opp.salaryMin, opp.salaryMax)}</span>
+          <a href="/opportunities/${encodeURIComponent(opp.id)}" class="tramplin-balloon-multi__card-link">
+            Подробнее
+            <span class="material-symbols-rounded" style="font-size:14px;vertical-align:-3px;">arrow_forward</span>
+          </a>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div class="tramplin-balloon-multi">
+      <div class="tramplin-balloon-multi__header">
+        <span class="material-symbols-rounded" style="font-size:18px;color:#6b7280;">location_on</span>
+        ${header}
+      </div>
+      <div class="tramplin-balloon-multi__list">
+        ${cards}
+      </div>
     </div>
   `;
 }
@@ -111,9 +181,47 @@ export default function MapView({ onMarkersLoaded, tagIds }: MapViewProps) {
   const [markers, setMarkers] = useState<OpportunityMapCard[]>([]);
   const [loading, setLoading] = useState(false);
   const mapRef = useRef<any>(null);
-  const { isFavorite } = useFavorites();
+  const { isFavorite, toggleFavorite } = useFavorites();
 
-  // Загрузка маркеров при изменении видимой области карты
+  // Храним toggleFavorite в ref, чтобы listener не пересоздавался каждый рендер
+  const toggleFavRef = useRef(toggleFavorite);
+  useEffect(() => {
+    toggleFavRef.current = toggleFavorite;
+  }, [toggleFavorite]);
+
+  // Делегирование кликов из метки - ловим кнопки 
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+      const btn = target.closest('[data-tramplin-action="toggle-fav"]') as HTMLElement | null;
+      if (!btn) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      const oppId = btn.getAttribute('data-tramplin-opp-id');
+      if (oppId) {
+        toggleFavRef.current(oppId);
+      }
+    }
+
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, []);
+
+  const grouped = useMemo(() => {
+    const map = new Map<string, OpportunityMapCard[]>();
+    for (const m of markers) {
+      if (m.latitude == null || m.longitude == null) continue;
+      const key = `${m.latitude.toFixed(5)},${m.longitude.toFixed(5)}`;
+      const arr = map.get(key) ?? [];
+      arr.push(m);
+      map.set(key, arr);
+    }
+    return map;
+  }, [markers]);
+
   const loadMarkers = useCallback(async (map: any) => {
     try {
       const bounds = map.getBounds();
@@ -139,23 +247,19 @@ export default function MapView({ onMarkersLoaded, tagIds }: MapViewProps) {
     loadMarkers(map);
   }, [loadMarkers]);
 
-  // При смене тегов — перезагружаем маркеры с текущими bounds
   useEffect(() => {
     if (mapRef.current) {
       loadMarkers(mapRef.current);
     }
   }, [tagIds, loadMarkers]);
 
-
-
-  
   return (
     <div className={styles.mapContainer}>
       {loading && <div className={styles.mapLoader}>Загрузка маркеров...</div>}
       <YMaps query={{ apikey: import.meta.env.VITE_YANDEX_MAPS_API_KEY || '', lang: 'ru_RU', load: 'package.full' }}>
-        <Map
+        <YMap
           defaultState={{
-            center: [55.7558, 37.6176], // Москва
+            center: [55.7558, 37.6176],
             zoom: 10,
             controls: ['zoomControl', 'fullscreenControl'],
           }}
@@ -172,23 +276,37 @@ export default function MapView({ onMarkersLoaded, tagIds }: MapViewProps) {
               clusterBalloonContentLayout: 'cluster#balloonCarousel',
             }}
           >
-            {markers.map(opp => (
-              <Placemark
-                key={opp.id}
-                geometry={[opp.latitude!, opp.longitude!]}
-                options={{
-                  preset: isFavorite(opp.id)
-                  ? 'islands#orangeCircleDotIcon'
-                  : (MARKER_PRESETS[opp.type] || 'islands#blueCircleDotIcon'),
-                }}
-                properties={{
-                  balloonContentBody: buildBalloonContent(opp),
-                  hintContent: opp.title,
-                }}
-              />
-            ))}
+            {Array.from(grouped.entries()).map(([coordKey, group]) => {
+              const first = group[0];
+              const favIds = new Set(group.filter(opp => isFavorite(opp.id)).map(opp => opp.id));
+              const hasFavorite = favIds.size > 0;
+              const preset = hasFavorite
+                ? 'islands#orangeCircleDotIcon'
+                : (MARKER_PRESETS[first.type] || 'islands#blueCircleDotIcon');
+
+              const balloonContent = group.length === 1
+                ? buildBalloonContent(first, hasFavorite)
+                : buildMultiBalloonContent(group, favIds);
+
+              const hint = group.length === 1
+                ? first.title
+                : `${group.length} ${pluralizeVacancies(group.length)} · ${first.companyName}`;
+
+              // Включаем флаг избранного в key, чтобы Яндекс пересоздал Placemark при изменении
+              return (
+                <Placemark
+                  key={`${coordKey}-${hasFavorite}-${group.length}`}
+                  geometry={[first.latitude!, first.longitude!]}
+                  options={{ preset }}
+                  properties={{
+                    balloonContentBody: balloonContent,
+                    hintContent: hint,
+                  }}
+                />
+              );
+            })}
           </Clusterer>
-        </Map>
+        </YMap>
       </YMaps>
     </div>
   );
