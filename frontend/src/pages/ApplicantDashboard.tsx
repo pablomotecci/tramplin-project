@@ -449,10 +449,10 @@ export function ApplicantDashboard() {
                 currentUrl={profile?.avatarUrl}
                 uploadFn={async (file) => {
                   const updated = await uploadApplicantAvatar(file);  // загрузка и созранение одним запросом
-                  setProfile(updated);  // показать новый аватар в профиле сразу
+                  setProfile(updated);                                // показать новый аватар в профиле сразу
                   return updated.avatarUrl || '';
                 }}
-                onUploaded={() => bumpAvatar}       // обновить аватар в хэдере
+                onUploaded={() => bumpAvatar()}       // обновить аватар в хэдере
               />
               <div className={styles.formRow}>
                 <Input
