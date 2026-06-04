@@ -21,13 +21,16 @@ import tramplin.dto.resume.CreateExperienceRequest;
 import tramplin.dto.resume.CreateProjectRequest;
 import tramplin.dto.resume.EducationResponse;
 import tramplin.dto.resume.ExperienceResponse;
+import tramplin.dto.resume.ParseResumeTagsRequest;
 import tramplin.dto.resume.ProjectResponse;
 import tramplin.dto.resume.ReorderRequest;
+import tramplin.dto.resume.SuggestedTagDto;
 import tramplin.dto.response.ApiResponse;
 import tramplin.security.UserPrincipal;
 import tramplin.service.ResumeEducationService;
 import tramplin.service.ResumeExperienceService;
 import tramplin.service.ResumeProjectService;
+import tramplin.service.ResumeTagSuggestionService;
 
 import java.util.List;
 import java.util.UUID;
@@ -41,6 +44,23 @@ public class ResumeController {
     private final ResumeExperienceService experienceService;
     private final ResumeProjectService projectService;
     private final ResumeEducationService educationService;
+    private final ResumeTagSuggestionService tagSuggestionService;
+
+    // ===== AI: разбор резюме → предложение тегов =====
+
+    @PostMapping("/parse-tags")
+    @PreAuthorize("hasRole('APPLICANT')")
+    @Operation(summary = "Разобрать резюме через ИИ",
+            description = "YandexGPT извлекает навыки из текста и предлагает теги из словаря. "
+                    + "Ничего не сохраняет — соискатель подтверждает выбор через PUT /profile/applicant/tags")
+    public ResponseEntity<ApiResponse<List<SuggestedTagDto>>> parseTags(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @Valid @RequestBody ParseResumeTagsRequest request
+    ) {
+        List<SuggestedTagDto> response = tagSuggestionService.suggestTags(
+                principal.getUserId(), request.getText());
+        return ResponseEntity.ok(ApiResponse.ok(response));
+    }
 
     // ===== Experiences =====
 

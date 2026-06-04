@@ -59,6 +59,18 @@ app:
       api-key: ${YANDEX_GEOCODER_API_KEY}
       base-url: https://geocode-maps.yandex.ru/1.x/
 
+    # --- YandexGPT (ИИ-разбор резюме → теги) ---
+    # Авторизация по статическому API-ключу сервисного аккаунта (не IAM-токен).
+    # folder-id уходит только в modelUri, не в заголовок. Пустой ключ →
+    # сервис деградирует: эндпоинт вернёт 422 AI_UNAVAILABLE, приложение работает.
+    gpt:
+      api-key: ${YANDEX_GPT_API_KEY:}
+      folder-id: ${YANDEX_FOLDER_ID:}
+      base-url: https://llm.api.cloud.yandex.net/foundationModels/v1/completion
+      model: yandexgpt-lite/latest
+      max-tokens: 2000
+      temperature: 0.1
+
   # --- CORS ---
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000,http://localhost:80,http://localhost}
