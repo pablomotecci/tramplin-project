@@ -1,7 +1,7 @@
 // API функции для ЛК соискателя.
 
 import api from './client';
-import type { ApiResponse, ApplicantProfileResponse, UpdateApplicantRequest, ApplicantSearchPage } from '../types';
+import type { ApiResponse, ApplicantProfileResponse, UpdateApplicantRequest, ApplicantSearchPage, SuggestedTagDto } from '../types';
 
 // Получить свой профиль соискателя
 export async function getApplicantProfile(): Promise<ApplicantProfileResponse> {
@@ -46,6 +46,16 @@ export async function getApplicantTags(): Promise<string[]> {
 // Обновить теги соискателя
 export async function updateApplicantTags(tagIds: string[]): Promise<void> {
   await api.put('/profile/applicant/tags', { tagIds });
+}
+
+
+// отправить текст резюме на разбор ИИ --> получить список подходящих тегов из словаря
+export async function parseResumeWithAI(text: string): Promise<SuggestedTagDto[]> {
+  const response = await api.post<ApiResponse<SuggestedTagDto[]>>(
+    '/profile/applicant/resume/parse-tags',
+    { text }
+  );
+  return response.data.data ?? [];
 }
 
 // Просмотр профиля другого соискателя (с учётом приватности)

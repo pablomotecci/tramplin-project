@@ -20,9 +20,12 @@ import java.util.UUID;
  * {@link TagService#resolveTagByName}.
  * <p>
  * Ничего не сохраняет — возвращает только предложения. Запись тегов в профиль —
- * отдельный осознанный шаг человека через существующий PUT /profile/applicant/tags.
- * Синонимы в промпт не уходят: модель оперирует каноническими именами, а синонимы
- * отрабатывают на обратном пути в resolveTagByName. Любой выдуманный навык, которого
+ * отдельный осознанный шаг человека через существующий PUT
+ * /profile/applicant/tags.
+ * Синонимы в промпт не уходят: модель оперирует каноническими именами, а
+ * синонимы
+ * отрабатывают на обратном пути в resolveTagByName. Любой выдуманный навык,
+ * которого
  * нет в словаре, отсекается на этом шаге и в систему не попадает.
  */
 @Slf4j
@@ -50,8 +53,11 @@ public class ResumeTagSuggestionService {
         // LinkedHashMap: дедуп по tagId с сохранением порядка появления навыков.
         Map<UUID, SuggestedTagDto> byId = new LinkedHashMap<>();
         for (String skill : skills) {
-            tagService.resolveTagByName(skill).ifPresent(tag ->
-                    byId.putIfAbsent(tag.getId(), SuggestedTagDto.builder()
+            // Страховка: модель иногда дописывает категорию в скобках, например
+            // "Java (LANGUAGE)". Отрезаем хвост "(...)" перед сопоставлением со словарём.
+            String cleaned = skill.replaceAll("\\s*\\(.*\\)\\s*$", "").trim();
+            tagService.resolveTagByName(cleaned)
+                    .ifPresent(tag -> byId.putIfAbsent(tag.getId(), SuggestedTagDto.builder()
                             .tagId(tag.getId())
                             .name(tag.getName())
                             .category(tag.getCategory())
@@ -65,12 +71,15 @@ public class ResumeTagSuggestionService {
     private String buildCatalogPrompt(List<Tag> catalog) {
         StringBuilder sb = new StringBuilder();
         sb.append("Ты извлекаешь профессиональные навыки из текста резюме. ")
-          .append("Сопоставляй каждый навык ТОЛЬКО с тегами из каталога ниже, используя ТОЧНОЕ имя тега. ")
-          .append("Не выдумывай теги, которых нет в каталоге. ")
-          .append("Верни строго JSON вида {\"tags\":[{\"name\":\"...\"}]} без пояснений и без markdown.\n\n")
-          .append("Каталог тегов (имя — категория):\n");
+                .append("Сопоставляй каждый навык ТОЛЬКО с тегами из каталога ниже. ")
+                .append("В поле \"name\" укажи ТОЛЬКО имя тега, БЕЗ категории и БЕЗ скобок. ")
+                .append("Не выдумывай теги, которых нет в каталоге. ")
+                .append("Верни строго JSON вида {\"tags\":[{\"name\":\"Java\"},{\"name\":\"Docker\"}]} ")
+                .append("без пояснений и без markdown.\n\n")
+                .append("Каталог тегов:\n");
         for (Tag tag : catalog) {
-            sb.append("- ").append(tag.getName()).append(" (").append(tag.getCategory()).append(")\n");
+            sb.append("- ").append(tag.getName())
+                    .append("  [категория: ").append(tag.getCategory()).append("]\n");
         }
         return sb.toString();
     }

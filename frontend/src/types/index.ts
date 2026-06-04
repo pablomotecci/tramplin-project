@@ -330,6 +330,18 @@ export interface MatchedTag {
   matchType: string;
 }
 
+
+
+
+export interface SuggestedTagDto {
+  tagId: string;
+  name: string;
+  category: TagCategory;
+}
+
+
+
+
 export interface ApplicationScoreSummary {
   scorePercent: number;
   matchedTags: MatchedTag[];

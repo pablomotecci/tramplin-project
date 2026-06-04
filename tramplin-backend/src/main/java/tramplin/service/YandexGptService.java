@@ -44,8 +44,7 @@ public class YandexGptService {
             @Value("${app.yandex.gpt.model}") String model,
             @Value("${app.yandex.gpt.max-tokens}") int maxTokens,
             @Value("${app.yandex.gpt.temperature}") double temperature,
-            ObjectMapper objectMapper
-    ) {
+            ObjectMapper objectMapper) {
         this.apiKey = apiKey;
         this.folderId = folderId;
         this.model = model;
@@ -117,6 +116,7 @@ public class YandexGptService {
                     .path("text")
                     .asText();
 
+            log.info("RAW YandexGPT ответ: [{}]", raw);
             // Модель иногда оборачивает JSON в ```-фенсы или преамбулу —
             // вырезаем тело объекта между первой { и последней }.
             int start = raw.indexOf('{');
@@ -134,6 +134,7 @@ public class YandexGptService {
                     skills.add(name.trim());
                 }
             }
+            log.info("Распознано навыков из JSON: {} -> {}", skills.size(), skills);
             return skills;
         } catch (BusinessException e) {
             throw e;

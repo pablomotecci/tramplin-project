@@ -11,7 +11,7 @@ import styles from './Dashboard.module.css';
 import { useFavorites } from '../hooks/useFavorites';
 import { getOpportunityById } from '../api/opportunities';
 import type { OpportunityResponse } from '../types';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { getMyApplications } from '../api/applications';
 import type { ApplicationResponse } from '../types';
 import type { ContactResponse, ContactRequestResponse } from '../types';
@@ -27,7 +27,7 @@ import type { Tag } from '../types';
 import { SkeletonList } from '../components/ui/Skeleton';
 import { EmptyState } from '../components/ui/EmptyState';
 import { useToast } from '../components/ui/Toast';
-
+import { AIParseModal } from '../components/resume/AIParseModal';
 
 
 export function ApplicantDashboard() {
@@ -79,6 +79,8 @@ export function ApplicantDashboard() {
   const [pwLoading, setPwLoading] = useState(false);
   const [pwError, setPwError] = useState<string | null>(null);
   const [pwSuccess, setPwSuccess] = useState(false);
+
+  const [aiModalOpen, setAiModalOpen] = useState(false);
 
   const { showToast } = useToast();
 
@@ -520,6 +522,22 @@ export function ApplicantDashboard() {
               {/* Портфолио */}
               <div className={styles.textareaGroup}>
                   <label className={styles.textareaLabel}>Навыки (теги)</label>
+                  <div style={{ marginBottom: '0.75rem' }}>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setAiModalOpen(true)}
+                    >
+                      <span className="material-symbols-rounded" style={{ fontSize: 16, marginRight: 4, verticalAlign: 'middle' }}>
+                        auto_awesome
+                      </span>
+                      Разобрать резюме через ИИ
+                    </Button>
+                    <span style={{ marginLeft: '0.5rem', fontSize: '0.78rem', color: 'var(--color-text-secondary)' }}>
+                      ИИ предложит теги из словаря — решаешь, какие применять
+                    </span>
+                  </div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                     {allTags.map(tag => {
                       const isSelected = selectedTagIds.includes(tag.id);
@@ -842,7 +860,15 @@ export function ApplicantDashboard() {
                   {contacts.map(c => (
                     <div key={c.contactRequestId} className={styles.appRow}>
                       <div className={styles.appInfo}>
-                        <span className={styles.appTitle} style={{ cursor: 'default' }}>{c.displayName}</span>
+                        <Link
+                          to={`/applicant/${c.userId}`}
+                          className={styles.appTitle}
+                          style={{ textDecoration: 'none', color: 'inherit' }}
+                          onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-accent)'; e.currentTarget.style.textDecoration = 'underline'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.color = ''; e.currentTarget.style.textDecoration = 'none'; }}
+                        >
+                          {c.displayName}
+                        </Link>
                         <span className={styles.appCompany}>{c.email}</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -875,7 +901,15 @@ export function ApplicantDashboard() {
                   {incomingRequests.map(req => (
                     <div key={req.id} className={styles.appRow}>
                       <div className={styles.appInfo}>
-                        <span className={styles.appTitle} style={{ cursor: 'default' }}>{req.senderDisplayName}</span>
+                        <Link
+                          to={`/applicant/${req.senderId}`}
+                          className={styles.appTitle}
+                          style={{ textDecoration: 'none', color: 'inherit' }}
+                          onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-accent)'; e.currentTarget.style.textDecoration = 'underline'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.color = ''; e.currentTarget.style.textDecoration = 'none'; }}
+                        >
+                          {req.senderDisplayName}
+                        </Link>
                         <span className={styles.appCompany}>{req.senderEmail}</span>
                       </div>
                       <div style={{ display: 'flex', gap: '0.4rem' }}>
@@ -1000,6 +1034,13 @@ export function ApplicantDashboard() {
             </div>
           </form>
         </section>
+        <AIParseModal
+          isOpen={aiModalOpen}
+          onClose={() => setAiModalOpen(false)}
+          initialText={[profile?.skillsSummary, profile?.bio].filter(Boolean).join('\n\n')}
+          currentTagIds={selectedTagIds}
+          onApplied={(merged) => setSelectedTagIds(merged)}
+        />
       </div>
     </main>
   );
