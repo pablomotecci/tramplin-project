@@ -1,0 +1,16 @@
+# Локальный dev-оверрайд. Compose подхватывает его автоматически при
+# `docker compose up` (без -f). Возвращает проброс портов на хост для
+# внешних инструментов (DataGrip, psql, прямой доступ к API).
+# На проде НЕ используется — там идёт docker-compose.prod.yml.
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+
+  backend:
+    ports:
+      - "8080:8080"
+
+  frontend:
+    ports:
+      - "80:80"

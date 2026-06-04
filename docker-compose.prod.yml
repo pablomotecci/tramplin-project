@@ -1,0 +1,37 @@
+# Prod-оверрайд. Запуск:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# Добавляет Caddy (авто-TLS Let's Encrypt), автоперезапуск и боевой CORS.
+# Порты БД/бэка наружу НЕ публикуются (их нет в базовом) — secure by default.
+services:
+  postgres:
+    restart: unless-stopped
+
+  backend:
+    restart: unless-stopped
+    environment:
+      CORS_ALLOWED_ORIGINS: https://tramplin.duckdns.org
+
+  frontend:
+    restart: unless-stopped
+    # build-arg ключа карт пробрасывается из серверного .env
+    build:
+      args:
+        VITE_YANDEX_MAPS_API_KEY: ${VITE_YANDEX_MAPS_API_KEY:-}
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: tramplin-caddy
+    restart: unless-stopped
+    depends_on:
+      - frontend
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:
