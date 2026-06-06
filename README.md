@@ -25,7 +25,7 @@ docker-compose up -d --build
 
 | Роль | Email | Пароль |
 |------|-------|--------|
-| Администратор | admin@tramplin.ru | Admin123! |
+| Администратор | admin@tramplin.ru |  |
 | Работодатель (Яндекс) | hr@yandex.ru | Test1234! |
 | Работодатель (VK) | hr@vk.com | Test1234! |
 | Соискатель | ivan.petrov@mail.ru | Test1234! |
